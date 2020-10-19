@@ -1,0 +1,634 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <title>测试 生命 - Rust开发WebAssembly技术 - 开源图书(OpenBooks)</title>
+        
+        <meta name="description" content="">
+        
+        
+        <script data-ad-client="ca-pub-9312750344484857" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/style.css">
+
+    
+            
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/images/favicon.ico" type="image/x-icon">
+
+    <link rel="next" href="debugging.html" />
+    <link rel="prev" href="implementing.html" />
+
+    </head>
+    <body>
+        
+<div class="book">  
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+	<a href="/" class="btn pull-left" aria-label="开源图书(OpenBooks)"><i class="fa fa-home"></i></a>
+    
+
+    <!-- Title -->
+    <h1><i class="fa fa-circle-o-notch fa-spin"></i><a href=".." >测试 生命</a></h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <ins class="adsbygoogle"
+                                     style="display:block"
+                                     data-ad-client="ca-pub-9312750344484857"
+                                     data-ad-slot="2669241897"
+                                     data-ad-format="auto"
+                                     data-full-width-responsive="true"></ins>
+                                <script>
+                                     (adsbygoogle = window.adsbygoogle || []).push({});
+                                </script>
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="&#x6D4B;&#x8BD5;-conways-&#x751F;&#x547D;&#x6E38;&#x620F;">&#x6D4B;&#x8BD5; Conway&apos;s &#x751F;&#x547D;&#x6E38;&#x620F;</h1>
+<p>&#x73B0;&#x5728;&#x6211;&#x4EEC;&#x5728;&#x6D4F;&#x89C8;&#x5668;&#x4E2D;&#x4F7F;&#x7528; JavaScript &#x8FD0;&#x7528; Rust(&#x7F16;&#x8BD1;&#x51FA; wasm) &#x5B9E;&#x73B0;&#x4E86;&#x751F;&#x547D;&#x6E38;&#x620F;&#x6E32;&#x67D3;&#xFF0C;&#x63A5;&#x4E0B;&#x6765;&#x8BA9;&#x6211;&#x4EEC;&#x6765;&#x8C08;&#x8C08;&#x6D4B;&#x8BD5; Rust &#x751F;&#x6210;&#x7684; WebAssembly &#x51FD;&#x6570;&#x3002;</p>
+<p>&#x6211;&#x4EEC;&#x8981;&#x6D4B;&#x8BD5;&#x4E00;&#x4E0B;<code>tick</code>&#x51FD;&#x6570;&#xFF0C;&#x4EE5;&#x786E;&#x4FDD;&#x5B83;&#x4E3A;&#x6211;&#x4EEC;&#x63D0;&#x4F9B;&#x9884;&#x671F;&#x7684;&#x8F93;&#x51FA;&#x3002;</p>
+<p>&#x4E0B;&#x4E00;&#x6B65;,&#x6211;&#x4EEC;&#x5C06;&#x8981;&#x5728;<code>wasm_game_of_life/src/lib.rs</code>&#x6587;&#x4EF6;&#x7684;<code>impl Universe</code>&#x4EE3;&#x7801;&#x533A;&#x5757;&#x5185;&#x90E8;&#xFF0C;&#x521B;&#x5EFA;&#x4E00;&#x4E9B; setter &#x548C; getter &#x51FD;&#x6570;&#x3002;&#x6211;&#x4EEC;&#x51C6;&#x5907;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;<code>set_width</code>&#x548C; &#x4E00;&#x4E2A;<code>set_height</code>&#x51FD;&#x6570;&#xFF0C;&#x6240;&#x4EE5;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x521B;&#x5EFA;&#x4E0D;&#x540C;&#x5927;&#x5C0F;&#x7684;<code>Universe</code>(&#x5B87;&#x5B99;)&#x3002;</p>
+<pre><code class="lang-rust"><span class="hljs-meta">#[wasm_bindgen]</span>
+<span class="hljs-keyword">impl</span> Universe {
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-comment">/// &#x8BBE;&#x7F6E; &#x5B87;&#x5B99; &#x7684; &#x5BBD;&#x5EA6;.</span>
+    <span class="hljs-comment">///</span>
+    <span class="hljs-comment">/// &#x5C06;&#x6240;&#x6709;&#x7684;&#x5355;&#x5143;&#xFF0C;&#x91CD;&#x65B0;&#x8BBE;&#x4E3A; &#x6B7B;&#x4EA1; &#x72B6;&#x6001;</span>
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">set_width</span></span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>, width: <span class="hljs-keyword">u32</span>) {
+        <span class="hljs-keyword">self</span>.width = width;
+        <span class="hljs-keyword">self</span>.cells = (<span class="hljs-number">0</span>..width * <span class="hljs-keyword">self</span>.height).map(|_i| Cell::Dead).collect();
+    }
+
+    <span class="hljs-comment">/// &#x8BBE;&#x7F6E; &#x5B87;&#x5B99; &#x7684; &#x9AD8;&#x5EA6;.</span>
+    <span class="hljs-comment">///</span>
+    <span class="hljs-comment">/// &#x5C06;&#x6240;&#x6709;&#x7684;&#x5355;&#x5143;&#xFF0C;&#x91CD;&#x65B0;&#x8BBE;&#x4E3A; &#x6B7B;&#x4EA1; &#x72B6;&#x6001;</span>
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">set_height</span></span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>, height: <span class="hljs-keyword">u32</span>) {
+        <span class="hljs-keyword">self</span>.height = height;
+        <span class="hljs-keyword">self</span>.cells = (<span class="hljs-number">0</span>..<span class="hljs-keyword">self</span>.width * height).map(|_i| Cell::Dead).collect();
+    }
+
+}
+</code></pre>
+<p>&#x6211;&#x4EEC;&#x6253;&#x7B97;&#x521B;&#x9020;&#x53E6;&#x4E00;&#x4E2A;&#xFF0C;&#x4E00;&#x6837;&#x662F;<code>wasm_game_of_life/src/lib.rs</code>&#x6587;&#x4EF6;&#x4E2D;<code>impl Universe</code>&#x4EE3;&#x7801;&#x533A;&#x5757;&#x5185;&#x90E8;&#xFF0C;&#x4F46;&#x6CA1;&#x6709;<code>#[wasm_bindgen]</code>&#x5C5E;&#x6027;&#x3002;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x4E00;&#x4E9B;&#x6D4B;&#x8BD5;&#x6240;&#x9700;&#x7684;&#x51FD;&#x6570;&#xFF0C;&#x4F46;&#x4E0D;&#x5E0C;&#x671B;&#x8FD9;&#x4E9B;&#x51FD;&#x6570;&#x7ED9;&#x5230;&#x6211;&#x4EEC;&#x7684; JavaScript&#x3002;Rust &#x751F;&#x6210;&#x7684; WebAssembly &#x51FD;&#x6570;&#x65E0;&#x6CD5;&#x8FD4;&#x56DE; <strong>&#x501F;&#x7528;&#x7684;</strong> &#x5F15;&#x7528;&#x3002;&#x5C1D;&#x8BD5;&#x4E0B;&#x4F7F;&#x7528;&#x5C5E;&#x6027;&#x7F16;&#x8BD1; Rust &#x751F;&#x6210;&#x7684; WebAssembly&#xFF0C;&#x5E76;&#x67E5;&#x770B;&#x60A8;&#x83B7;&#x5F97;&#x7684;&#x9519;&#x8BEF;&#x3002;</p>
+<p>&#x6211;&#x4EEC;&#x5C06;&#x7F16;&#x5199;&#x5B9E;&#x73B0;<code>get_cells</code>&#xFF0C;&#x4E3B;&#x8981;&#x7528;&#x6765;&#x5F97;&#x5230;&#x4E00;&#x4E2A;<code>Universe</code>&#x4E2D;&#x7684;<code>cells</code>&#x7684;&#x5185;&#x5BB9;&#x3002;&#x6211;&#x4EEC;&#x8FD8;&#x4F1A;&#x5199;&#x4E00;&#x4E2A;<code>set_cells</code>&#x51FD;&#x6570;&#xFF0C;&#x8FD9;&#x6837;&#x6211;&#x4EEC;&#x624D;&#x53EF;&#x4EE5;&#x8BBE;&#x7F6E;&#x4E00;&#x4E2A;<code>Universe</code>&#x4E2D;&#xFF0C;&#x7279;&#x5B9A;&#x884C;&#x5217;&#x7684;<code>cells</code>&#x4E3A;<code>Alive.</code>(&#x6D3B;&#x7684;)</p>
+<pre><code class="lang-rust"><span class="hljs-keyword">impl</span> Universe {
+    <span class="hljs-comment">/// &#x7ED9;&#x51FA; &#x5168;&#x90E8;&#x5B87;&#x5B99; &#x6B7B;&#x548C;&#x6D3B;&#x7684;&#x503C;</span>
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">get_cells</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; &amp;[Cell] {
+        &amp;<span class="hljs-keyword">self</span>.cells
+    }
+
+    <span class="hljs-comment">/// &#x901A;&#x8FC7;&#x4F20;&#x9012; &#x4F5C;&#x4E3A;&#x6570;&#x7EC4;&#x7684; &#x5355;&#x5143;(&#x884C;&#x4E0E;&#x5217;)&#xFF0C;&#x53EF;&#x5728;&#x4E00;&#x4E2A;&#x5B87;&#x5B99;&#x5185;&#x8BBE;&#x7F6E;&#x8BE5;&#x5355;&#x5143;&#x4E3A;&#x6D3B;&#x7684;</span>
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">set_cells</span></span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>, cells: &amp;[(<span class="hljs-keyword">u32</span>, <span class="hljs-keyword">u32</span>)]) {
+        <span class="hljs-keyword">for</span> (row, col) <span class="hljs-keyword">in</span> cells.iter().cloned() {
+            <span class="hljs-keyword">let</span> idx = <span class="hljs-keyword">self</span>.get_index(row, col);
+            <span class="hljs-keyword">self</span>.cells[idx] = Cell::Alive;
+        }
+    }
+
+}
+</code></pre>
+<p>&#x73B0;&#x5728;&#x6211;&#x4EEC;&#x8981;&#x5728;<code>wasm_game_of_life/tests/web.rs</code>&#x6587;&#x4EF6;&#x4E2D;&#x521B;&#x5EFA;&#x6211;&#x4EEC;&#x7684;&#x6D4B;&#x8BD5;&#x3002;</p>
+<p>&#x5728;&#x6211;&#x4EEC;&#x8FD9;&#x6837;&#x505A;&#x4E4B;&#x524D;,&#x6587;&#x4EF6;&#x4E2D;&#x5DF2;&#x7ECF;&#x6709;&#x4E00;&#x4E2A;&#x5DE5;&#x4F5C;&#x6D4B;&#x8BD5;&#x3002;&#x60A8;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x5728;<code>wasm-game-of-life</code>&#x76EE;&#x5F55;&#x91CC;&#x9762;&#xFF0C;&#x8FD0;&#x884C;<code>wasm-pack test --chrome --headless</code>&#x786E;&#x8BA4; Rust &#x751F;&#x6210;&#x7684; WebAssembly &#x6D4B;&#x8BD5;&#x662F;&#x5426;&#x6B63;&#x5E38;&#x5DE5;&#x4F5C;&#x3002;&#x4F60;&#x4E5F;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;<code>--firefox</code>,<code>--safari</code>,&#x548C;<code>--node</code>&#x5728;&#x8FD9;&#x4E9B;&#x6D4F;&#x89C8;&#x5668;&#x4E2D;&#x6D4B;&#x8BD5;&#x4EE3;&#x7801;&#x7684;&#x9009;&#x9879;.</p>
+<p>&#x5728;<code>wasm_game_of_life/tests/web.rs</code>&#x6587;&#x4EF6;&#x91CC;&#x9762;&#xFF0C;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x5BFC;&#x51FA;&#x6211;&#x4EEC;&#x7684;<code>wasm_game_of_life</code>&#x7BB1;&#x5B50;&#x548C;<code>Universe</code>&#x7C7B;&#x578B;.</p>
+<pre><code class="lang-rust"><span class="hljs-keyword">extern</span> <span class="hljs-keyword">crate</span> wasm_game_of_life;
+<span class="hljs-keyword">use</span> wasm_game_of_life::Universe;
+</code></pre>
+<p>&#x5728;<code>wasm_game_of_life/tests/web.rs</code>&#x6587;&#x4EF6;&#x91CC;&#x9762;&#xFF0C;&#x6211;&#x4EEC;&#x8981;&#x521B;&#x5EFA;&#x4E00;&#x4E9B;&#x592A;&#x7A7A;&#x8239;(spaceship)&#x6784;&#x5EFA;&#x5668;&#x51FD;&#x6570;&#x3002;</p>
+<p>&#x5148;&#x8981;&#x4E00;&#x4E2A; input_spaceship(&#x8F93;&#x5165;&#x7684;&#x5B87;&#x5B99;&#x98DE;&#x8239;) &#xFF0C;&#x8FD9;&#x6837;&#x6211;&#x4EEC;&#x4F1A;&#x8BA9;<code>tick</code>&#x51FD;&#x6570;&#x5F00;&#x542F;&#x8C03;&#x7528;&#xFF0C;&#x8FD8;&#x6709;&#x6211;&#x4EEC;&#x5728;&#x4E00;&#x6B21; tick &#x540E;&#xFF0C;&#x8981;&#x83B7;&#x53D6; expected_spaceship(&#x9884;&#x671F;&#x7684;&#x5B87;&#x5B99;&#x98DE;&#x8239;) &#x3002;&#x6211;&#x4EEC;&#x9009;&#x62E9;&#x4E86;&#x60F3;&#x8981;&#x521D;&#x59CB;&#x5316;&#x4E3A;<code>Alive</code>&#x7684;&#x5355;&#x5143;&#x683C;&#xFF0C;&#x5728;<code>input_spaceship</code>&#x51FD;&#x6570;&#x4E2D;&#x521B;&#x9020;&#x6211;&#x4EEC;&#x7684;&#x5B87;&#x5B99;&#x98DE;&#x8239;&#x3002;&#x5728;&#x624B;&#x52A8;&#x7684;<code>input_spaceship</code>&#x8FC7;&#x4E86;&#x4E00;&#x6B21; tick &#x540E;&#xFF0C; &#x5B87;&#x5B99;&#x98DE;&#x8239;&#x7684;&#x4F4D;&#x7F6E;&#x5C31;&#x5728;<code>expected_spaceship</code>&#x51FD;&#x6570;&#x3002;&#x60A8;&#x53EF;&#x4EE5;&#x81EA;&#x5DF1;&#x786E;&#x8BA4;&#x4E0B;&#xFF0C;&#x5728;&#x4E00;&#x6B21; tick &#x540E;&#xFF0C;&#x8F93;&#x5165;&#x98DE;&#x8239;&#x7684;&#x5355;&#x5143;&#x4E0E;&#x9884;&#x671F;&#x7684;&#x76F8;&#x540C;.</p>
+<pre><code class="lang-rust"><span class="hljs-meta">#[cfg(test)]</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">input_spaceship</span></span>() -&gt; Universe {
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> universe = Universe::new();
+    universe.set_width(<span class="hljs-number">6</span>);
+    universe.set_height(<span class="hljs-number">6</span>);
+    universe.set_cells(&amp;[(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>), (<span class="hljs-number">2</span>,<span class="hljs-number">3</span>), (<span class="hljs-number">3</span>,<span class="hljs-number">1</span>), (<span class="hljs-number">3</span>,<span class="hljs-number">2</span>), (<span class="hljs-number">3</span>,<span class="hljs-number">3</span>)]);
+    universe
+}
+
+<span class="hljs-meta">#[cfg(test)]</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">expected_spaceship</span></span>() -&gt; Universe {
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> universe = Universe::new();
+    universe.set_width(<span class="hljs-number">6</span>);
+    universe.set_height(<span class="hljs-number">6</span>);
+    universe.set_cells(&amp;[(<span class="hljs-number">2</span>,<span class="hljs-number">1</span>), (<span class="hljs-number">2</span>,<span class="hljs-number">3</span>), (<span class="hljs-number">3</span>,<span class="hljs-number">2</span>), (<span class="hljs-number">3</span>,<span class="hljs-number">3</span>), (<span class="hljs-number">4</span>,<span class="hljs-number">2</span>)]);
+    universe
+}
+</code></pre>
+<p>&#x73B0;&#x5728;&#x6211;&#x4EEC;&#x5B9E;&#x73B0;<code>test_tick</code>&#x51FD;&#x6570;&#x3002;&#x9996;&#x5148;,&#x6211;&#x4EEC;&#x521B;&#x5EFA;<code>input_spaceship()</code>&#x548C;<code>expected_spaceship()</code>&#xFF0C;&#x5404;&#x4E00;&#x4E2A;&#x5B9E;&#x4F8B;&#x3002;&#x7136;&#x540E;,&#x6211;&#x4EEC;&#x5728;<code>input_universe</code>&#x4E0A;&#x8C03;&#x7528;<code>tick</code>&#x3002;&#x6700;&#x540E;,&#x6211;&#x4EEC;&#x4F7F;&#x7528;&#x4E86;<code>assert_eq!</code>&#x5B8F;&#x6765;&#x8C03;&#x7528;<code>get_cells()</code>&#xFF0C;&#x786E;&#x4FDD;<code>input_universe</code>&#x548C;<code>expected_universe</code>&#x6709;&#x540C;&#x6837;&#x7684;<code>Cell</code>&#x6570;&#x7EC4;&#x503C;&#x3002;&#x6211;&#x4EEC;&#x52A0;&#x4E0A;&#x4E86;<code>#[wasm_bindgen_test]</code>&#x5C5E;&#x6027;&#x5230;&#x6211;&#x4EEC;&#x7684;&#x4EE3;&#x7801;&#x5757;&#xFF0C;&#x6240;&#x4EE5;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x6D4B;&#x8BD5; Rust &#x751F;&#x6210;&#x7684; WebAssembly &#x4EE3;&#x7801;&#xFF0C;&#x5E76;&#x4F7F;&#x7528;<code>wasm-build test</code>&#x6D4B;&#x8BD5; WebAssembly &#x4EE3;&#x7801;&#x3002;</p>
+<pre><code class="lang-rust"><span class="hljs-meta">#[wasm_bindgen_test]</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">test_tick</span></span>() {
+    <span class="hljs-comment">// &#x8BA9;&#x6211;&#x4EEC;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x5C0F;&#x70B9; &#x7684;&#x5B87;&#x5B99;&#xFF0C;&#x5E26;&#x7740;&#x6211;&#x4EEC;&#x5FAE;&#x98DE;&#x8239;&#x6D4B;&#x8BD5;&#x5427;!</span>
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> input_universe = input_spaceship();
+
+    <span class="hljs-comment">// &#x6211;&#x4EEC;&#x5B87;&#x5B99;&#x7684;&#x4E00;&#x6B21;&#x6EF4;&#x7B54;&#x540E;&#xFF0C;&#x6211;&#x4EEC;&#x7684;&#x98DE;&#x8239;&#x5E94;&#x8BE5;&#x53D8;&#x6210;&#x4E86;&#x8FD9;&#x6837;</span>
+    <span class="hljs-keyword">let</span> expected_universe = expected_spaceship();
+
+    <span class="hljs-comment">// &#x8C03;&#x7528; `tick` &#xFF0C;&#x7136;&#x540E;&#x770B;&#x770B; `Universe`&#x7684;&#x5355;&#x5143;&#x662F;&#x5426;&#x4E00;&#x81F4;</span>
+    input_universe.tick();
+    <span class="hljs-built_in">assert_eq!</span>(&amp;input_universe.get_cells(), &amp;expected_universe.get_cells());
+}
+</code></pre>
+<p>&#x5728;<code>wasm-game-of-life</code>&#x76EE;&#x5F55;&#x4E2D;&#xFF0C;&#x901A;&#x8FC7;&#x8FD0;&#x884C;<code>wasm-pack test --firefox --headless</code>&#x8FD0;&#x884C;&#x6D4B;&#x8BD5;&#x3002;</p>
+
+                                
+                                </section>
+                                <ins class="adsbygoogle"
+                                     style="display:block"
+                                     data-ad-client="ca-pub-9312750344484857"
+                                     data-ad-slot="2669241897"
+                                     data-ad-format="auto"
+                                     data-full-width-responsive="true"></ins>
+                                <script>
+                                     (adsbygoogle = window.adsbygoogle || []).push({});
+                                </script>                                
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="implementing.html" class="navigation navigation-prev " aria-label="上一页: 实现康威的生命游戏">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="debugging.html" class="navigation navigation-next " aria-label="下一页: 调试">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            <a href="../">
+            
+                    
+                    介绍
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../why-rust-and-webassembly.html">
+            <a href="../why-rust-and-webassembly.html">
+            
+                    
+                    为啥 Rust 要与 WebAssembly 合作?
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="../background-and-concepts.html">
+            <a href="../background-and-concepts.html">
+            
+                    
+                    背景和概念
+            </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.3.1" data-path="../what-is-webassembly.html">
+            <a href="../what-is-webassembly.html">
+            
+                    
+                    什么是 WebAssembly?
+            </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="./">
+            <a href="./">
+            
+                    
+                    教程
+            </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.1.1" data-path="setup.html">
+            <a href="setup.html">
+            
+                    
+                    安装
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.2" data-path="hello-world.html">
+            <a href="hello-world.html">
+            
+                    
+                    Hello, World!
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.3" data-path="rules.html">
+            <a href="rules.html">
+            
+                    
+                    规则们
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.4" data-path="implementing.html">
+            <a href="implementing.html">
+            
+                    
+                    实现康威的生命游戏
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="2.1.5" data-path="testing.html">
+            <a href="testing.html">
+            
+                    
+                    测试 生命
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.6" data-path="debugging.html">
+            <a href="debugging.html">
+            
+                    
+                    调试
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.7" data-path="interactivity.html">
+            <a href="interactivity.html">
+            
+                    
+                    添加 交互性
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.8" data-path="time-profiling.html">
+            <a href="time-profiling.html">
+            
+                    
+                    时间 分析
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.9" data-path="code-size.html">
+            <a href="code-size.html">
+            
+                    
+                    收缩 .wasm 尺寸
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.10" data-path="publishing-to-npm.html">
+            <a href="publishing-to-npm.html">
+            
+                    
+                    发布到 npm
+            </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../reference/">
+            <a href="../reference/">
+            
+                    
+                    参考
+            </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="../reference/crates.html">
+            <a href="../reference/crates.html">
+            
+                    
+                    你应该知道的 Crates(箱) 
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="../reference/tools.html">
+            <a href="../reference/tools.html">
+            
+                    
+                    你应该知道的 工具 
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.3" data-path="../reference/project-templates.html">
+            <a href="../reference/project-templates.html">
+            
+                    
+                    项目模版 Templates
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.4" data-path="../reference/debugging.html">
+            <a href="../reference/debugging.html">
+            
+                    
+                    调试
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.5" data-path="../reference/time-profiling.html">
+            <a href="../reference/time-profiling.html">
+            
+                    
+                    时间 分析
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.6" data-path="../reference/code-size.html">
+            <a href="../reference/code-size.html">
+            
+                    
+                    收缩 .wasm 尺寸
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.7" data-path="../reference/js-ffi.html">
+            <a href="../reference/js-ffi.html">
+            
+                    
+                    javascript 互操作
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.8" data-path="../reference/which-crates-work-with-wasm.html">
+            <a href="../reference/which-crates-work-with-wasm.html">
+            
+                    
+                    哪些 现成的(crates)箱能与 WebAssembly 合作？
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.9" data-path="../reference/add-wasm-support-to-crate.html">
+            <a href="../reference/add-wasm-support-to-crate.html">
+            
+                    
+                    如何向通用 箱 添加 WebAssembly 支持
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.10" data-path="../reference/deploying-to-production.html">
+            <a href="../reference/deploying-to-production.html">
+            
+                    
+                    将 Rust 和 Webassembly 部署到生产中
+            </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://book.comptechs.cn" target="_blank" class="gitbook-link"><strong>开源图书(OpenBooks)</strong></a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"测试 生命","level":"2.1.5","depth":2,"next":{"title":"调试","level":"2.1.6","depth":2,"path":"game-of-life/debugging.md","ref":"./game-of-life/debugging.md","articles":[]},"previous":{"title":"实现康威的生命游戏","level":"2.1.4","depth":2,"path":"game-of-life/implementing.md","ref":"./game-of-life/implementing.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-vmlite@git+https://github.com/vmlite/gitbook-plugin-theme-vmlite.git"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-vmlite":{"showLevel":false,"styles":{"ebook":"styles/ebook.css","epub":"styles/epub.css","mobi":"styles/mobi.css","pdf":"styles/pdf.css","print":"styles/print.css","website":"styles/website.css"}},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Rust开发WebAssembly技术","language":"zh-hans","gitbook":"*"},"file":{"path":"game-of-life/testing.md","mtime":"2020-10-19T01:03:43.630Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-10-19T01:04:13.871Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/gitbook.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/theme.js"></script>
+    
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-152683495-1"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'UA-152683495-1'); 
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?b6193f769a96b5f12f441649fc8d4e49";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+        </script>
+    </body>
+</html>
+

@@ -1,0 +1,1048 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <title>实现康威的生命游戏 - Rust开发WebAssembly技术 - 开源图书(OpenBooks)</title>
+        
+        <meta name="description" content="">
+        
+        
+        <script data-ad-client="ca-pub-9312750344484857" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/style.css">
+
+    
+            
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/images/favicon.ico" type="image/x-icon">
+
+    <link rel="next" href="testing.html" />
+    <link rel="prev" href="rules.html" />
+
+    </head>
+    <body>
+        
+<div class="book">  
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+	<a href="/" class="btn pull-left" aria-label="开源图书(OpenBooks)"><i class="fa fa-home"></i></a>
+    
+
+    <!-- Title -->
+    <h1><i class="fa fa-circle-o-notch fa-spin"></i><a href=".." >实现康威的生命游戏</a></h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <ins class="adsbygoogle"
+                                     style="display:block"
+                                     data-ad-client="ca-pub-9312750344484857"
+                                     data-ad-slot="2669241897"
+                                     data-ad-format="auto"
+                                     data-full-width-responsive="true"></ins>
+                                <script>
+                                     (adsbygoogle = window.adsbygoogle || []).push({});
+                                </script>
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="&#x5B9E;&#x73B0;&#x5EB7;&#x5A01;&#x7684;&#x751F;&#x547D;&#x6E38;&#x620F;">&#x5B9E;&#x73B0;&#x5EB7;&#x5A01;&#x7684;&#x751F;&#x547D;&#x6E38;&#x620F;</h1>
+<h2 id="&#x8BBE;&#x8BA1;">&#x8BBE;&#x8BA1;</h2>
+<p>&#x5728;&#x6211;&#x4EEC;&#x6DF1;&#x5165;&#x4E4B;&#x524D;&#xFF0C;&#x6211;&#x4EEC;&#x6709;&#x4E00;&#x4E9B;&#x8BBE;&#x8BA1;&#x9009;&#x62E9;&#x9700;&#x8981;&#x8003;&#x8651;&#x3002;</p>
+<h3 id="&#x65E0;&#x9650;&#x7684;&#x5B87;&#x5B99;">&#x65E0;&#x9650;&#x7684;&#x5B87;&#x5B99;</h3>
+<p>&#x751F;&#x547D;&#x6E38;&#x620F;&#x662F;&#x5728;&#x65E0;&#x9650;&#x7684;&#x5B87;&#x5B99;&#x4E2D;&#x8FDB;&#x884C;&#x7684;&#xFF0C;&#x4F46;&#x6211;&#x4EEC;&#x6CA1;&#x6709;&#x65E0;&#x9650;&#x7684;&#x5185;&#x5B58;&#x548C;&#x8BA1;&#x7B97;&#x80FD;&#x529B;&#x3002; &#x89E3;&#x51B3;&#x8FD9;&#x4E2A;&#x76F8;&#x5F53;&#x607C;&#x4EBA;&#x7684;&#x9650;&#x5236;&#xFF0C;&#x901A;&#x5E38;&#x6709;&#x4EE5;&#x4E0B;&#x4E09;&#x79CD;&#x98CE;&#x683C;:</p>
+<p>1&#x3002; &#x8DDF;&#x8E2A;&#x5B87;&#x5B99;&#x7684;&#x54EA;&#x4E2A;&#x5B50;&#x96C6;&#x53D1;&#x751F;&#x4E86;&#x6709;&#x8DA3;&#x7684;&#x4E8B;&#x60C5;&#xFF0C;&#x5E76;&#x6839;&#x636E;&#x9700;&#x8981;&#xFF0C;&#x6269;&#x5C55;&#x6B64;&#x533A;&#x57DF;&#x3002; &#x5728;&#x6700;&#x574F;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x8FD9;&#x79CD;&#x6269;&#x5C55;&#x662F;&#x65E0;&#x9650;&#x5236;&#x7684;&#xFF0C;&#x5B9E;&#x73B0;&#x5C06;&#x53D8;&#x5F97;&#x8D8A;&#x6765;&#x8D8A;&#x6162;&#xFF0C;&#x6700;&#x7EC8;&#x8017;&#x5C3D;&#x5185;&#x5B58;&#x3002;</p>
+<p>2&#x3002; &#x521B;&#x5EFA;&#x56FA;&#x5B9A;&#x5927;&#x5C0F;&#x7684; Universe&#xFF0C;&#x8FB9;&#x7F18;&#x4E0A;&#x7684;&#x5355;&#x5143;&#x683C;&#x5177;&#x6709;&#x8F83;&#x5C11;&#x7684;&#x90BB;&#x5C45;
+&#x6BD4;&#x4E2D;&#x95F4;&#x7684;&#x5355;&#x5143;&#x683C;&#x3002; &#x8FD9;&#x79CD;&#x65B9;&#x6CD5;&#x7684;&#x7F3A;&#x70B9;&#x662F;&#x65E0;&#x9650;
+&#x50CF;&#x6ED1;&#x7FD4;&#x673A;&#x4E00;&#x6837;&#x5230;&#x8FBE;&#x5B87;&#x5B99;&#x5C3D;&#x5934;&#x7684;&#x6A21;&#x5F0F;&#x88AB;&#x627C;&#x6740;&#x4E86;&#x3002;</p>
+<p>3&#x3002; &#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x56FA;&#x5B9A;&#x5927;&#x5C0F;&#x7684;&#x5468;&#x671F;&#x6027; Universe&#xFF0C;&#x5176;&#x4E2D;&#x8FB9;&#x7F18;&#x4E0A;&#x7684;&#x5355;&#x5143;&#x683C;&#x5177;&#x6709;&#x73AF;&#x7ED5;&#x5230; Universe &#x53E6;&#x4E00;&#x4FA7;&#x7684;&#x90BB;&#x5C45;&#x3002; &#x56E0;&#x4E3A;&#x90BB;&#x5C45;&#x73AF;&#x7ED5;&#x5B87;&#x5B99;&#x7684;&#x8FB9;&#x7F18;&#xFF0C;&#x6ED1;&#x7FD4;&#x673A;&#x53EF;&#x4EE5;&#x6C38;&#x8FDC;&#x8FD0;&#x884C;&#x3002;</p>
+<p>&#x6211;&#x4EEC;&#x5C06;&#x5B9E;&#x73B0;<code>&#x7B2C;&#x4E09;&#x79CD;</code>&#x9009;&#x62E9;&#x3002;</p>
+<h3 id="&#x8FDE;&#x63A5;-rust-&#x548C;-javascript">&#x8FDE;&#x63A5; Rust &#x548C; JavaScript</h3>
+<blockquote>
+<p>&#x26A1; &#x8FD9;&#x662F;&#x4ECE;&#x672C;&#x6559;&#x7A0B;&#x4E2D;&#xFF0C;&#x4F60;&#x8981;&#x7406;&#x89E3;&#x548C;&#x83B7;&#x53D6;&#x7684;&#x6700;&#x91CD;&#x8981;&#x7684;&#x6982;&#x5FF5;&#x4E4B;&#x4E00;!</p>
+</blockquote>
+<p>JavaScript &#x7684;&#x5783;&#x573E;&#x6536;&#x96C6;&#x5806; - <code>Object</code>&#xFF0C;<code>Array</code>&#x548C; DOM &#x8282;&#x70B9; &#x662F;&#x88AB;&#x5206;&#x914D;&#x7684; - &#x4E0D;&#x540C;&#x4E8E; WebAssembly &#x7684;&#x7EBF;&#x6027;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#xFF0C;&#x6211;&#x4EEC;&#x7684; Rust &#x503C; &#x5B58;&#x5728;&#x4E8E;&#x5176;&#x4E2D;&#x3002; WebAssembly &#x76EE;&#x524D;&#x65E0;&#x6CD5;&#x76F4;&#x63A5;&#x8BBF;&#x95EE;&#x5783;&#x573E;&#x6536;&#x96C6;&#x5806; (&#x622A;&#x81F3; 2018 &#x5E74; 4 &#x6708;&#xFF0C;&#x9884;&#x8BA1;&#x4F1A;&#x968F;<a href="https://github.com/WebAssembly/host-bindings/blob/master/proposals/host-bindings/Overview.md" target="_blank">&quot;&#x4E3B;&#x673A;&#x7ED1;&#x5B9A; host-bindings&quot;&#x63D0;&#x6848;</a>&#x800C;&#x6539;&#x53D8;) &#x3002; &#x53E6;&#x4E00;&#x65B9;&#x9762;&#xFF0C;JavaScript &#x53EF;&#x4EE5;&#x8BFB;&#x53D6;&#x548C;&#x5199;&#x5165; WebAssembly &#x7EBF;&#x6027;&#x5B58;&#x50A8;&#x7A7A;&#x95F4;&#xFF0C;&#x4F46;&#x4EC5;&#x4F5C;&#x4E3A;&#x4E00;&#x4E2A;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer" target="_blank"><code>ArrayBuffer</code></a>&#x6807;&#x91CF;&#x503C; (<code>u8</code>&#xFF0C;<code>i32</code>&#xFF0C;<code>f64</code>&#x7B49;&#x7B49;...) WebAssembly &#x51FD;&#x6570;&#x4E5F;&#x63A5;&#x53D7;&#xFF0C;&#x5E76;&#x8FD4;&#x56DE;&#x6807;&#x91CF;&#x503C;. &#x8FD9;&#x4E9B;&#x662F;&#x6784;&#x6210; WebAssembly &#x548C; JavaScript &#x901A;&#x4FE1; &#x7684;&#x6240;&#x6709;&#x6784;&#x5EFA;&#x5757;&#x3002;</p>
+<p><code>wasm_bindgen</code>&#x5B9A;&#x4E49;&#x4E86;&#xFF0C;&#x5982;&#x4F55;&#x4E0E;&#x8DE8;&#x8FB9;&#x754C;&#x590D;&#x5408;&#x7ED3;&#x6784;&#x4E00;&#x8D77;&#x5DE5;&#x4F5C;&#x7684;&#x5171;&#x8BC6;&#x3002; &#x5B83;&#x6D89;&#x53CA;&#x5C01;&#x88C5; Rust &#x7ED3;&#x6784;&#xFF0C;&#x5C06;&#x6307;&#x9488;&#x5305;&#x88C5;&#x5728; JavaScript &#x7C7B; &#x4E2D;&#x4EE5;&#x5B9E;&#x73B0;&#x53EF;&#x7528;&#x6027;&#xFF0C;&#x6216;&#x8005; &#x4ECE; Rust &#x7D22;&#x5F15;&#x5230; &#x4E00;&#x4E2A; JavaScript &#x5BF9;&#x8C61;&#x8868;&#x683C;&#x3002; <code>wasm_bindgen</code>&#x975E;&#x5E38;&#x65B9;&#x4FBF;&#xFF0C;&#x4F46;&#x5B83;&#x4E0D;&#x9700;&#x8981;&#x8003;&#x8651;&#x6211;&#x4EEC;&#x7684;&#x6570;&#x636E;&#x8868;&#x793A;&#xFF0C;&#x4EE5;&#x53CA;&#x8DE8;&#x8D8A;&#x8FD9;&#x4E2A;&#x8FB9;&#x754C;&#x4F20;&#x9012;&#x4EC0;&#x4E48;&#x503C;&#x548C;&#x7ED3;&#x6784;.&#x3002;&#x76F8;&#x53CD;&#xFF0C;&#x5C06;&#x5176;&#x89C6;&#x4E3A;&#x5B9E;&#x73B0;&#x60A8;&#x9009;&#x62E9;&#x7684;&#x63A5;&#x53E3;&#x8BBE;&#x8BA1;&#x7684;&#x5DE5;&#x5177;&#x3002;</p>
+<p>&#x5728;&#x8BBE;&#x8BA1; WebAssembly &#x548C; JavaScript &#x4E4B;&#x95F4;&#x7684;&#x63A5;&#x53E3;&#x65F6;&#xFF0C;&#x6211;&#x4EEC;&#x5E0C;&#x671B;&#x9488;&#x5BF9;&#x4EE5;&#x4E0B;&#x5C5E;&#x6027;&#x8FDB;&#x884C;&#x4F18;&#x5316;:</p>
+<ol>
+<li><p><strong>&#x6700;&#x5C0F;&#x5316; WebAssembly &#x7EBF;&#x6027;&#x5B58;&#x50A8;&#x5668;&#x7684; &#x8FDB;/&#x51FA;&#x590D;&#x5236; &#x3002;</strong>&#x4E0D;&#x5FC5;&#x8981;&#x7684;&#x526F;&#x672C;&#x4F1A;&#x4EA7;&#x751F;&#x4E0D;&#x5FC5;&#x8981;&#x7684;&#x5F00;&#x9500;&#x3002;</p>
+</li>
+<li><p><strong>&#x6700;&#x5C0F;&#x5316;&#x5E8F;&#x5217;&#x5316;&#x548C;&#x53CD;&#x5E8F;&#x5217;&#x5316;&#x3002;</strong>&#x4E0E;&#x590D;&#x5236;&#x7C7B;&#x4F3C;&#xFF0C;&#x5E8F;&#x5217;&#x5316;&#x548C;&#x53CD;&#x5E8F;&#x5217;&#x5316;&#x4E5F;&#x4F1A;&#x4EA7;&#x751F;&#x5F00;&#x9500;&#xFF0C;&#x5E76;&#x4E14;&#x901A;&#x5E38;&#x4E5F;&#x4F1A;&#x8FDB;&#x884C;&#x590D;&#x5236;&#x3002; &#x5982;&#x679C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x5C06;&#x4E0D;&#x900F;&#x660E;&#x7684;&#x63A7;&#x5236;&#xFF0C;&#x4F20;&#x9012;&#x7ED9;&#x6570;&#x636E;&#x7ED3;&#x6784; - &#x800C;&#x4E0D;&#x662F;&#x5728;&#x4E00;&#x8FB9;&#x5E8F;&#x5217;&#x5316;&#x540E;&#xFF0C;&#x5C06;&#x5176;&#x590D;&#x5236;&#x5230; WebAssembly &#x7EBF;&#x6027;&#x5B58;&#x50A8;&#x5668;&#x4E2D;&#x7684;&#x67D0;&#x4E2A;&#x5DF2;&#x77E5;&#x4F4D;&#x7F6E;&#xFF0C;&#x5E76;&#x5728;&#x53E6;&#x4E00;&#x8FB9;&#x8FDB;&#x884C;&#x53CD;&#x5E8F;&#x5217;&#x5316; - &#x6211;&#x4EEC;&#x901A;&#x5E38;&#x53EF;&#x4EE5;&#x51CF;&#x5C11;&#x5927;&#x91CF;&#x5F00;&#x9500;&#x3002; <code>wasm_bindgen</code>&#x5E2E;&#x52A9;&#x6211;&#x4EEC; &#x5B9A;&#x4E49;&#x548C;&#x4F7F;&#x7528; JavaScript &#x7684;<code>Object</code>&#x6216; &#x5DF2;&#x5C01;&#x88C5;&#x7684; Rust &#x7ED3;&#x6784;&#x7684;&#x4E0D;&#x900F;&#x660E;&#x63A7;&#x5236;&#x3002;</p>
+</li>
+</ol>
+<p>&#x4F5C;&#x4E3A;&#x4E00;&#x822C;&#x7684;&#x7ECF;&#x9A8C;&#x6CD5;&#x5219;&#xFF0C;&#x4E00;&#x4E2A;&#x597D;&#x7684; JavaScript&#x2194;WebAssembly &#x63A5;&#x53E3;&#x8BBE;&#x8BA1;&#xFF0C;&#x901A;&#x5E38;&#x662F;&#x5C06;&#x5927;&#x578B;&#xFF0C;&#x957F;&#x5BFF;&#x547D;&#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x5B9E;&#x73B0;&#xFF0C;&#x4E3A;&#x751F;&#x6D3B;&#x5728; WebAssembly &#x7EBF;&#x6027;&#x5185;&#x5B58; &#x4E2D;&#x7684; Rust &#x7C7B;&#x578B;&#xFF0C;&#x5E76;&#x4F5C;&#x4E3A;&#x4E0D;&#x900F;&#x660E;&#x63A7;&#x5236;&#x66B4;&#x9732;&#x7ED9; JavaScript. JavaScript &#x8C03;&#x7528;&#xFF0C;&#x8FD9;&#x4E9B;&#x6301;&#x6709;&#x4E0D;&#x900F;&#x660E;&#x63A7;&#x5236;&#x7684;&#x5BFC;&#x51FA;&#x4E86;&#x7684; WebAssembly &#x51FD;&#x6570;&#xFF0C;&#x8F6C;&#x6362;&#x6570;&#x636E;&#xFF0C;&#x6267;&#x884C;&#x7E41;&#x91CD;&#x7684;&#x8BA1;&#x7B97;&#xFF0C;&#x67E5;&#x8BE2;&#x6570;&#x636E;&#xFF0C;&#x6700;&#x7EC8;&#x8FD4;&#x56DE;&#x4E00;&#x4E2A;&#x5C0F;&#x7684;&#x53EF;&#x590D;&#x5236;&#x7ED3;&#x679C;&#x3002; &#x901A;&#x8FC7;&#x4EC5;&#x8FD4;&#x56DE;&#x8BA1;&#x7B97;&#x7684;&#x5C0F;&#x7ED3;&#x679C;&#xFF0C;&#x6211;&#x4EEC;&#x907F;&#x514D;&#x5728; JavaScript &#x5783;&#x573E;&#x6536;&#x96C6;&#x5806;&#x548C; WebAssembly &#x7EBF;&#x6027;&#x5B58;&#x50A8;&#x5668; &#x4E4B;&#x95F4;&#xFF0C;&#x6765;&#x56DE;&#x590D;&#x5236;&#x548C;&#x5E8F;&#x5217;&#x5316;&#x6240;&#x6709;&#x5185;&#x5BB9;&#x3002;</p>
+<h3 id="&#x5728;&#x6211;&#x4EEC;&#x7684;&#x751F;&#x547D;&#x6E38;&#x620F;&#x4E2D;&#x8FDE;&#x63A5;-rust-&#x548C;-javascript">&#x5728;&#x6211;&#x4EEC;&#x7684;&#x751F;&#x547D;&#x6E38;&#x620F;&#x4E2D;&#x8FDE;&#x63A5; Rust &#x548C; JavaScript</h3>
+<p>&#x8BA9;&#x6211;&#x4EEC;&#x9996;&#x5148;&#x5217;&#x4E3E;&#x4E00;&#x4E9B;&#x8981;&#x907F;&#x514D;&#x7684;&#x5371;&#x9669;&#x3002; &#x6211;&#x4EEC;&#x4E0D;&#x5E0C;&#x671B;&#x5728;&#x6BCF;&#x6B21;<code>tick</code>&#xFF0C;&#x90FD;&#x5C06;&#x6574;&#x4E2A; Universe &#x590D;&#x5236;&#x5230; WebAssembly &#x7EBF;&#x6027;&#x5185;&#x5B58;&#x3002; &#x6211;&#x4EEC;&#x4E0D;&#x5E0C;&#x671B;&#x4E3A;&#x5B87;&#x5B99;&#x4E2D;&#x7684;&#x6BCF;&#x4E2A;&#x5355;&#x5143;&#x5206;&#x914D;&#x5BF9;&#x8C61;&#xFF0C;&#x4E5F;&#x4E0D;&#x60F3;&#x5F3A;&#x52A0;&#x4E00;&#x4E2A;&#x8DE8;&#x8FB9;&#x754C;&#x8C03;&#x7528;&#x6765;&#x8BFB;&#x5199;&#x6BCF;&#x4E2A;&#x5355;&#x5143;&#x3002;</p>
+<p>&#x8FD9;&#x7ED9;&#x6211;&#x4EEC;&#x7559;&#x4E0B;&#x4E86;&#x4EC0;&#x4E48;? &#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x5C06; Universe &#x8868;&#x793A;&#x4E3A;&#xFF0C;&#x4F4D;&#x4E8E; WebAssembly &#x7EBF;&#x6027;&#x5185;&#x5B58;&#x4E2D;&#x7684;&#x5E73;&#x9762;&#x6570;&#x7EC4;&#xFF0C;&#x5E76;&#x4E14;&#x6BCF;&#x4E2A;&#x5355;&#x5143;&#x683C;&#x90FD;&#x6709;&#x4E00;&#x4E2A;&#x5B57;&#x8282;&#x3002; <code>0</code>&#x662F;&#x4E00;&#x4E2A;&#x6B7B;&#x5355;&#x5143;&#x683C;&#xFF0C;<code>1</code>&#x662F;&#x4E00;&#x4E2A;&#x6D3B;&#x5355;&#x5143;&#x683C;&#x3002;</p>
+<p>&#x4EE5;&#x4E0B;&#x662F; 4 x 4 &#x5B87;&#x5B99;&#x5728;&#x5185;&#x5B58;&#x4E2D;&#x7684;&#x6837;&#x5B50;:</p>
+<p><img src="images/game-of-life/universe.png" alt="Screenshot of a 4 by 4 universe"></p>
+<p>&#x8981;&#x5728; Universe &#x7684;&#x7ED9;&#x5B9A;&#x884C;&#x548C;&#x5217;&#x4E2D;&#xFF0C;&#x67E5;&#x627E;&#x5355;&#x5143;&#x683C;&#x7684;&#x6570;&#x7EC4;&#x7D22;&#x5F15;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;&#x4EE5;&#x4E0B;&#x516C;&#x5F0F;:</p>
+<pre><code class="lang-text">index(row, column, universe) = row * width(universe) + column
+</code></pre>
+<p>&#x6211;&#x4EEC;&#x6709;&#x51E0;&#x79CD;&#x65B9;&#x6CD5;&#x53EF;&#x4EE5;&#x5C06; Universe &#x7684;&#x5355;&#x5143;&#x683C;&#x66B4;&#x9732;&#x7ED9; JavaScript&#x3002; &#x9996;&#x5148;&#xFF0C;&#x6211;&#x4EEC;&#x4E3A;<code>Universe</code>&#x6DFB;&#x52A0;<a href="https://doc.rust-lang.org/1.25.0/std/fmt/trait.Display.html" target="_blank"><code>std::fmt::Display</code></a>&#x5B9E;&#x73B0;&#xFF0C;&#x53EF;&#x4EE5;&#x7528;&#x6765;&#x4EA7;&#x751F; &#x4E00;&#x4E2A;&#x5355;&#x5143;&#x683C;&#x7684; Rust<code>String</code> &#xFF0C;&#x6E32;&#x67D3;&#x4E3A;&#x6587;&#x672C;&#x5B57;&#x7B26;&#x3002; &#x7136;&#x540E;&#x5C06;&#x6B64; Rust String &#x4ECE; WebAssembly &#x7EBF;&#x6027;&#x5185;&#x5B58; &#x590D;&#x5236;&#x5230; JavaScript &#x7684;&#x5783;&#x573E;&#x56DE;&#x6536;&#x5806;&#x4E2D; &#x7684; JavaScript String &#x4E2D;&#xFF0C;&#x7136;&#x540E;&#x901A;&#x8FC7;&#x8BBE;&#x7F6E;<code>HTML</code>&#x7684;<code>textContent</code>&#x663E;&#x793A;&#x3002; &#x5728;&#x672C;&#x7AE0;&#x7684;&#x540E;&#x9762;&#xFF0C;&#x6211;&#x4EEC;&#x5C06;&#x63A8;&#x6F14;&#x8FD9;&#x4E2A;&#x5B9E;&#x73B0;&#xFF0C;&#x4EE5;&#x907F;&#x514D;&#x5728;&#x5806;&#x4E4B;&#x95F4;&#x590D;&#x5236; Universe &#x7684;&#x5355;&#x5143;&#x683C;&#xFF0C;&#x548C;&#x6E32;&#x67D3;&#x5230;<code>&lt;canvas&gt;</code>&#x3002;</p>
+<p><em>&#x53E6;&#x4E00;&#x4E2A;&#x53EF;&#x884C;&#x7684;&#x8BBE;&#x8BA1;&#x66FF;&#x4EE3;&#x65B9;&#x6848;&#x662F;&#xFF0C; Rust &#x8FD4;&#x56DE;&#x6BCF;&#x6B21; tick &#x540E;&#xFF0C;&#x66F4;&#x6539;&#x72B6;&#x6001;&#x7684;&#x6BCF;&#x4E2A;&#x5355;&#x5143;&#x683C;&#x7684;&#x5217;&#x8868;&#xFF0C;&#x800C;&#x4E0D;&#x662F;&#x5C06;&#x6574;&#x4E2A; Universe &#x66B4;&#x9732;&#x7ED9; JavaScript&#x3002; &#x597D;&#x5904;&#x5728;&#x4E8E;&#xFF0C;JavaScript &#x5728;&#x6E32;&#x67D3;&#x65F6;&#x4E0D;&#x9700;&#x8981;&#x904D;&#x5386;&#x6574;&#x4E2A; Universe &#xFF0C;&#x53EA;&#x9700;&#x8981;&#x76F8;&#x5173;&#x7684;&#x5B50;&#x96C6;&#x3002; &#x95EE;&#x9898;&#x6743;&#x8861;&#xFF0C;&#x5728;&#x4E8E;&#x8FD9;&#x79CD; &#x57FA;&#x4E8E; delta &#x7684;&#x8BBE;&#x8BA1;&#x5B9E;&#x73B0;&#x8D77;&#x6765;&#xFF0C;&#x7A0D;&#x5FAE;&#x56F0;&#x96BE;&#x4E00;&#x4E9B;&#x3002;</em></p>
+<h2 id="rust-&#x5B9E;&#x73B0;">Rust &#x5B9E;&#x73B0;</h2>
+<p>&#x5728;&#x4E0A;&#x4E00;&#x7AE0;&#x4E2D;&#xFF0C;&#x6211;&#x4EEC;&#x514B;&#x9686;&#x4E86;&#x4E00;&#x4E2A;&#x521D;&#x59CB;&#x9879;&#x76EE;&#x6A21;&#x677F;. &#x6211;&#x4EEC;&#x73B0;&#x5728;&#x5C06;&#x4FEE;&#x6539;&#x8BE5;&#x9879;&#x76EE;&#x6A21;&#x677F;.</p>
+<p>&#x8BA9;&#x6211;&#x4EEC;&#x5F00;&#x59CB;&#x5220;&#x9664; <code>wasm-game-of-life/src/lib.rs</code>&#x7684; <code>alert</code>&#x5BFC;&#x5165; &#x548C;<code>greet</code> &#x51FD;&#x6570;&#xFF0C;&#x5E76;&#x7528;&#x5355;&#x5143;&#x683C;&#x7684;&#x7C7B;&#x578B;&#x5B9A;&#x4E49;&#x66FF;&#x6362;&#x5B83;&#x4EEC;:</p>
+<pre><code class="lang-rust"><span class="hljs-meta">#[wasm_bindgen]</span>
+<span class="hljs-meta">#[repr(u8)]</span>
+<span class="hljs-meta">#[derive(Clone, Copy, Debug, PartialEq, Eq)]</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">Cell</span></span> {
+    Dead = <span class="hljs-number">0</span>,
+    Alive = <span class="hljs-number">1</span>,
+}
+</code></pre>
+<p>&#x91CD;&#x8981;&#x7684;&#x662F;&#x6211;&#x4EEC;&#x62E5;&#x6709;<code>#[repr(u8)]</code>&#xFF0C;&#x4EE5;&#x4FBF;&#x6BCF;&#x4E2A;&#x5355;&#x5143;&#x683C;&#x8868;&#x793A;&#x4E3A;&#x5355;&#x4E2A;&#x5B57;&#x8282;&#x3002; &#x540C;&#x6837;&#x91CD;&#x8981;&#x7684;&#x662F;<code>Dead</code>&#x4EE3;&#x8868;<code>0</code>&#xFF0C;&#x90A3;&#x4E2A;<code>Alive</code>&#x662F;<code>1</code>&#xFF0C;&#x8FD9;&#x6837;&#x6211;&#x4EEC;&#x5C31;&#x53EF;&#x4EE5;&#x8F7B;&#x677E;&#x5730;&#x8BA1;&#x7B97;&#x4E00;&#x4E2A;&#x5355;&#x5143;&#x683C;&#x7684;&#x6D3B;&#x90BB;&#x5C45;&#x3002;</p>
+<p>&#x63A5;&#x4E0B;&#x6765;&#xFF0C;&#x8BA9;&#x6211;&#x4EEC;&#x5B9A;&#x4E49;&#x5B87;&#x5B99;(Universe)&#x3002; &#x5B87;&#x5B99;&#x5177;&#x6709;&#x5BBD;&#x5EA6;&#x548C;&#x9AD8;&#x5EA6;&#xFF0C;&#x4EE5;&#x53CA;&#x957F;&#x5EA6;&#x4E3A;<code>width * height</code>&#x7684;&#x5355;&#x5143;&#x683C;&#x5411;&#x91CF;&#x3002;</p>
+<pre><code class="lang-rust"><span class="hljs-meta">#[wasm_bindgen]</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Universe</span></span> {
+    width: <span class="hljs-keyword">u32</span>,
+    height: <span class="hljs-keyword">u32</span>,
+    cells: <span class="hljs-built_in">Vec</span>&lt;Cell&gt;,
+}
+</code></pre>
+<p>&#x8981;&#x8BBF;&#x95EE; &#x7ED9;&#x5B9A;&#x884C;&#x548C;&#x5217; &#x7684;&#x5355;&#x5143;&#x683C;&#xFF0C;&#x6211;&#x4EEC;&#x5C06; &#x884C;&#x548C;&#x5217; &#x8F6C;&#x6362;&#x4E3A; &#x5355;&#x5143;&#x683C;&#x5411;&#x91CF; &#x7684;&#x7D22;&#x5F15;&#xFF0C;&#x5982;&#x524D;&#x6240;&#x8FF0;:</p>
+<pre><code class="lang-rust"><span class="hljs-keyword">impl</span> Universe {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">get_index</span></span>(&amp;<span class="hljs-keyword">self</span>, row: <span class="hljs-keyword">u32</span>, column: <span class="hljs-keyword">u32</span>) -&gt; usize {
+        (row * <span class="hljs-keyword">self</span>.width + column) <span class="hljs-keyword">as</span> usize
+    }
+
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>&#x4E3A;&#x4E86;&#x8BA1;&#x7B97;&#x5355;&#x5143;&#x683C;&#x7684;&#x4E0B;&#x4E00;&#x4E2A;&#x72B6;&#x6001;&#xFF0C;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x8BA1;&#x7B97; &#x5176;&#x90BB;&#x5C45;&#x6709;&#x591A;&#x5C11; &#x662F;&#x6D3B;&#x7740;&#x7684;&#x3002; &#x6211;&#x4EEC;&#x6765;&#x5199;&#x4E00;&#x4E2A;<code>live_neighbor_count</code>&#x65B9;&#x6CD5;&#xFF0C;&#x505A;&#x5230;&#x8FD9;&#x4E00;&#x70B9;!</p>
+<pre><code class="lang-rust"><span class="hljs-keyword">impl</span> Universe {
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">live_neighbor_count</span></span>(&amp;<span class="hljs-keyword">self</span>, row: <span class="hljs-keyword">u32</span>, column: <span class="hljs-keyword">u32</span>) -&gt; <span class="hljs-keyword">u8</span> {
+        <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> count = <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">for</span> delta_row <span class="hljs-keyword">in</span> [<span class="hljs-keyword">self</span>.height - <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>].iter().cloned() {
+            <span class="hljs-keyword">for</span> delta_col <span class="hljs-keyword">in</span> [<span class="hljs-keyword">self</span>.width - <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>].iter().cloned() {
+                <span class="hljs-keyword">if</span> delta_row == <span class="hljs-number">0</span> &amp;&amp; delta_col == <span class="hljs-number">0</span> {
+                    <span class="hljs-keyword">continue</span>;
+                }
+
+                <span class="hljs-keyword">let</span> neighbor_row = (row + delta_row) % <span class="hljs-keyword">self</span>.height;
+                <span class="hljs-keyword">let</span> neighbor_col = (column + delta_col) % <span class="hljs-keyword">self</span>.width;
+                <span class="hljs-keyword">let</span> idx = <span class="hljs-keyword">self</span>.get_index(neighbor_row, neighbor_col);
+                count += <span class="hljs-keyword">self</span>.cells[idx] <span class="hljs-keyword">as</span> <span class="hljs-keyword">u8</span>;
+            }
+        }
+        count
+    }
+}
+</code></pre>
+<p><code>live_neighbor_count</code>&#x65B9;&#x6CD5;&#x4F7F;&#x7528; deltas &#x548C; modulo &#x6765;&#x907F;&#x514D;&#x5B87;&#x5B99;&#x7684;&#x8FB9;&#x7F18;&#x60C5;&#x51B5;&#x3002; &#x5F53;&#x5E94;&#x7528;<code>-1</code>&#x7684;&#x589E;&#x91CF;&#x65F6;&#xFF0C;&#x6211;&#x4EEC;<em>&#x6DFB;&#x52A0;</em>
+<code>self.height - 1</code>&#xFF0C;&#x7136;&#x540E;&#x8BA9; modulo &#x505A;&#x5B83;&#x7684;&#x4E8B;&#xFF0C;&#x800C;&#x4E0D;&#x662F;&#x8BD5;&#x56FE;&#x51CF;&#x53BB;<code>1</code>&#x3002; <code>row</code>&#x548C;<code>column</code>&#x53EF;&#x4EE5;&#x4E3A;<code>0</code>&#xFF0C;&#x5982;&#x679C;&#x6211;&#x4EEC;&#x8BD5;&#x56FE;&#x51CF;&#x53BB;<code>1</code>&#xFF0C; &#x4ECE;&#x4ED6;&#x4EEC;&#x6765;&#x770B;&#xFF0C;&#x4F1A;&#x6709;&#x4E00;&#x4E2A; &#x65E0;&#x7B26;&#x53F7;&#x6574;&#x6570; &#x4E0B;&#x6EA2;&#x3002;</p>
+<p>&#x73B0;&#x5728;&#x6211;&#x4EEC;&#x62E5;&#x6709;&#x4E86;&#x5F53;&#x524D;&#x8BA1;&#x7B97;&#x4E0B;&#x4E00;&#x4EE3;&#x6240;&#x9700;&#x7684;&#x4E00;&#x5207;! &#x6BCF;&#x4E2A;&#x6E38;&#x620F;&#x7684;&#x89C4;&#x5219;&#x9075;&#x5FAA; &#x8F6C;&#x6362;&#x6761;&#x4EF6;&#x7528;<code>match</code>&#x76F4;&#x63A5;&#x8868;&#x8FBE;&#x3002; &#x53E6;&#x5916;&#xFF0C;&#x56E0;&#x4E3A;&#x6211;&#x4EEC;&#x5E0C;&#x671B; JavaScript &#x63A7;&#x5236; tick &#x65F6;&#x95F4;&#xFF0C;&#x6211;&#x4EEC;&#x5C06;&#x628A;&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#x653E;&#x5728;&#x4E00;&#x4E2A;<code>#[wasm_bindgen]</code>&#x6CE8;&#x91CA;&#x4E0B;&#xFF0C;&#x4EE5;&#x4FBF;&#x5B83;&#x66B4;&#x9732;&#x7ED9; JavaScript&#x3002;</p>
+<pre><code class="lang-rust"><span class="hljs-comment">/// &#x516C;&#x6709;&#x65B9;&#x6CD5;, &#x66B4;&#x9732;&#x7ED9; JavaScript.</span>
+<span class="hljs-meta">#[wasm_bindgen]</span>
+<span class="hljs-keyword">impl</span> Universe {
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">tick</span></span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>) {
+        <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> next = <span class="hljs-keyword">self</span>.cells.clone();
+
+        <span class="hljs-keyword">for</span> row <span class="hljs-keyword">in</span> <span class="hljs-number">0</span>..<span class="hljs-keyword">self</span>.height {
+            <span class="hljs-keyword">for</span> col <span class="hljs-keyword">in</span> <span class="hljs-number">0</span>..<span class="hljs-keyword">self</span>.width {
+                <span class="hljs-keyword">let</span> idx = <span class="hljs-keyword">self</span>.get_index(row, col);
+                <span class="hljs-keyword">let</span> cell = <span class="hljs-keyword">self</span>.cells[idx];
+                <span class="hljs-keyword">let</span> live_neighbors = <span class="hljs-keyword">self</span>.live_neighbor_count(row, col);
+
+                <span class="hljs-keyword">let</span> next_cell = <span class="hljs-keyword">match</span> (cell, live_neighbors) {
+                    <span class="hljs-comment">// &#x89C4;&#x5219; 1: &#x4EFB;&#x4F55;&#x5C11;&#x4E8E;&#x4E24;&#x4E2A;&#x90BB;&#x5C45;&#x7684;&#x6D3B;&#x7EC6;&#x80DE;&#x6B7B;&#x4EA1;&#xFF0C;&#x5C31;&#x597D;&#x50CF;&#x662F;&#x7531;&#x4E8E;&#x4EBA;&#x53E3;&#x4E0D;&#x8DB3;&#x9020;&#x6210;&#x7684;&#x4E00;&#x6837;&#x3002;.</span>
+                    (Cell::Alive, x) <span class="hljs-keyword">if</span> x &lt; <span class="hljs-number">2</span> =&gt; Cell::Dead,
+                    <span class="hljs-comment">// &#x89C4;&#x5219; 2: &#x4EFB;&#x4F55;&#x4E00;&#x4E2A;&#x6709;&#x4E24;&#x4E2A;&#x6216;&#x4E09;&#x4E2A;&#x90BB;&#x5C45;&#x7684;&#x6D3B;&#x4F53;&#x7EC6;&#x80DE;&#x90FD;&#x80FD;&#x4F20;&#x5230;&#x4E0B;&#x4E00;&#x4EE3;&#x3002;.</span>
+                    (Cell::Alive, <span class="hljs-number">2</span>) | (Cell::Alive, <span class="hljs-number">3</span>) =&gt; Cell::Alive,
+                    <span class="hljs-comment">// &#x89C4;&#x5219; 3: &#x4EFB;&#x4F55;&#x5C45;&#x4F4F;&#x7740;&#x4E09;&#x4E2A;&#x4EE5;&#x4E0A;&#x90BB;&#x5C45;&#x7684;&#x6D3B;&#x7EC6;&#x80DE;&#x90FD;&#x4F1A;&#x6B7B;&#x4EA1;&#xFF0C;&#x5C31;&#x597D;&#x50CF;&#x662F;&#x7531;&#x4E8E;&#x4EBA;&#x53E3;&#x8FC7;&#x5269;&#x3002;.</span>
+                    (Cell::Alive, x) <span class="hljs-keyword">if</span> x &gt; <span class="hljs-number">3</span> =&gt; Cell::Dead,
+                    <span class="hljs-comment">// &#x89C4;&#x5219; 4:&#x4EFB;&#x4F55;&#x4E00;&#x4E2A;&#x53EA;&#x6709;&#x4E09;&#x4E2A;&#x76F8;&#x90BB;&#x7684;&#x6D3B;&#x7EC6;&#x80DE;&#x7684;&#x6B7B;&#x7EC6;&#x80DE;&#x90FD;&#x4F1A;&#x53D8;&#x6210;&#x6D3B;&#x7EC6;&#x80DE;&#xFF0C;&#x5C31;&#x50CF;&#x901A;&#x8FC7;&#x7E41;&#x6B96;&#x4E00;&#x6837;&#x3002;.</span>
+                    (Cell::Dead, <span class="hljs-number">3</span>) =&gt; Cell::Alive,
+                    <span class="hljs-comment">// &#x6240;&#x6709;&#x5176;&#x4ED6;&#x5355;&#x5143;&#x683C;&#x4FDD;&#x6301;&#x76F8;&#x540C;&#x72B6;&#x6001;&#x3002;</span>
+                    (otherwise, _) =&gt; otherwise,
+                };
+
+                next[idx] = next_cell;
+            }
+        }
+
+        <span class="hljs-keyword">self</span>.cells = next;
+    }
+
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>&#x5230;&#x76EE;&#x524D;&#x4E3A;&#x6B62;&#xFF0C;&#x5B87;&#x5B99;&#x7684;&#x72B6;&#x6001;&#x88AB;&#x8868;&#x793A;&#x4E3A; &#x5355;&#x5143;&#x683C; &#x7684;&#x8F7D;&#x4F53;&#x3002; &#x4E3A;&#x4E86;&#x4F7F;&#x8FD9;&#x4E2A;&#x53EF;&#x8BFB;&#xFF0C;&#x8BA9;&#x6211;&#x4EEC;&#x5B9E;&#x73B0;&#x4E00;&#x4E2A;&#x57FA;&#x672C;&#x7684;&#x6587;&#x672C;&#x6E32;&#x67D3;&#x5668;&#x3002; &#x6211;&#x4EEC;&#x7684;&#x60F3;&#x6CD5;&#x662F;&#x9010;&#x884C;&#x5C06; Universe &#x5199;&#x6210;&#x6587;&#x672C;&#xFF0C;&#x5BF9;&#x4E8E;&#x6BCF;&#x4E2A;&#x6D3B;&#x7740;&#x7684;&#x5355;&#x5143;&#x683C;&#xFF0C;&#x6253;&#x5370; Unicode &#x5B57;&#x7B26;<code>&#x25FC;&#xFE0F;</code> (&quot;&#x9ED1;&#x8272;&#x65B9;&#x683C;&quot;) &#x3002; &#x5BF9;&#x4E8E;&#x6B7B;&#x5355;&#x5143;&#x683C;&#xFF0C;&#x6211;&#x4EEC;&#x5C06;&#x6253;&#x5370;<code>&#x25FB;&#xFE0F;</code> (&quot;&#x767D;&#x8272;&#x65B9;&#x683C;&quot;) &#x3002;</p>
+<p>&#x901A;&#x8FC7;&#x5B9E;&#x73B0;&#x6765;&#x81EA; Rust &#x6807;&#x51C6;&#x5E93; &#x7684;<a href="https://doc.rust-lang.org/1.25.0/std/fmt/trait.Display.html" target="_blank"><code>Display</code></a>trait &#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x6DFB;&#x52A0;&#x4E00;&#x79CD;&#x9762;&#x5411;&#x7528;&#x6237;, &#x683C;&#x5F0F;&#x5316;&#x7ED3;&#x6784;&#x7684;&#x65B9;&#x6CD5;&#x3002; &#x8FD9;&#x4E5F;&#x4F1A;&#x81EA;&#x52A8;&#x7ED9;&#x6211;&#x4EEC;&#x4E00;&#x4E2A;<a href="https://doc.rust-lang.org/1.25.0/std/string/trait.ToString.html" target="_blank"><code>to_string</code></a>&#x65B9;&#x6CD5;.</p>
+<pre><code class="lang-rust"><span class="hljs-keyword">use</span> std::fmt;
+
+<span class="hljs-keyword">impl</span> fmt::Display <span class="hljs-keyword">for</span> Universe {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">fmt</span></span>(&amp;<span class="hljs-keyword">self</span>, f: &amp;<span class="hljs-keyword">mut</span> fmt::Formatter) -&gt; fmt::<span class="hljs-built_in">Result</span> {
+        <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> <span class="hljs-keyword">self</span>.cells.as_slice().chunks(<span class="hljs-keyword">self</span>.width <span class="hljs-keyword">as</span> usize) {
+            <span class="hljs-keyword">for</span> &amp;cell <span class="hljs-keyword">in</span> line {
+                <span class="hljs-keyword">let</span> symbol = <span class="hljs-keyword">if</span> cell == Cell::Dead { <span class="hljs-string">&quot;&#x25FB;&#xFE0F;&quot;</span> } <span class="hljs-keyword">else</span> { <span class="hljs-string">&quot;&#x25FC;&#xFE0F;&quot;</span> };
+                <span class="hljs-built_in">write!</span>(f, <span class="hljs-string">&quot;{}&quot;</span>, symbol)?;
+            }
+            <span class="hljs-built_in">write!</span>(f, <span class="hljs-string">&quot;\n&quot;</span>)?;
+        }
+
+        <span class="hljs-literal">Ok</span>(())
+    }
+}
+</code></pre>
+<p>&#x6700;&#x540E;&#xFF0C;&#x6211;&#x4EEC;&#x5B9A;&#x4E49;&#x4E00;&#x4E2A;&#x6784;&#x9020;&#x51FD;&#x6570;&#xFF0C;&#x7528;&#x4E00;&#x4E2A;&#x6709;&#x8DA3;&#x7684; &#x6D3B;&#x5355;&#x5143;&#x683C;&#x548C;&#x6B7B;&#x5355;&#x5143;&#x683C; &#x6A21;&#x5F0F;&#x6765;&#x521D;&#x59CB;&#x5316;&#x5B87;&#x5B99;&#xFF0C;&#x4EE5;&#x53CA;<code>render</code>&#x65B9;&#x6CD5;:</p>
+<pre><code class="lang-rust"><span class="hljs-comment">/// Public methods, exported to JavaScript.</span>
+<span class="hljs-meta">#[wasm_bindgen]</span>
+<span class="hljs-keyword">impl</span> Universe {
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new</span></span>() -&gt; Universe {
+        <span class="hljs-keyword">let</span> width = <span class="hljs-number">64</span>;
+        <span class="hljs-keyword">let</span> height = <span class="hljs-number">64</span>;
+
+        <span class="hljs-keyword">let</span> cells = (<span class="hljs-number">0</span>..width * height)
+            .map(|i| {
+                <span class="hljs-keyword">if</span> i % <span class="hljs-number">2</span> == <span class="hljs-number">0</span> || i % <span class="hljs-number">7</span> == <span class="hljs-number">0</span> {
+                    Cell::Alive
+                } <span class="hljs-keyword">else</span> {
+                    Cell::Dead
+                }
+            })
+            .collect();
+
+        Universe {
+            width,
+            height,
+            cells,
+        }
+    }
+
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">render</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; <span class="hljs-built_in">String</span> {
+        <span class="hljs-keyword">self</span>.to_string()
+    }
+}
+</code></pre>
+<p>&#x6709;&#x4E86;&#x8FD9;&#x4E2A;&#xFF0C;&#x6211;&#x4EEC;&#x7684;&#x751F;&#x547D;&#x6E38;&#x620F; Rust &#x5B9E;&#x73B0;&#x7684;&#x4E00;&#x534A;&#x5C31;&#x5B8C;&#x6210;&#x4E86;!</p>
+<p>&#x5728;<code>wasm-game-of-life</code> &#x76EE;&#x5F55;&#x5185;&#xFF0C;&#x901A;&#x8FC7;&#x8FD0;&#x884C;<code>wasm-pack build</code>&#x91CD;&#x65B0;&#x7F16;&#x8BD1;&#x4E3A; WebAssembly&#x3002;</p>
+<h2 id="&#x4F7F;&#x7528;-javascript-&#x6E32;&#x67D3;">&#x4F7F;&#x7528; JavaScript &#x6E32;&#x67D3;</h2>
+<p>&#x9996;&#x5148;&#xFF0C;&#x8BA9;&#x6211;&#x4EEC;&#x6DFB;&#x52A0;&#x4E00;&#x4E2A;&#x7528;&#x4E8E;&#x6E32;&#x67D3;&#x5B87;&#x5B99;&#x7684;<code>&lt;pre&gt;</code>&#x5143;&#x7D20;&#x5230;<code>wasm-game-of-life/www/index.html</code>&#xFF0C;&#x5C31;&#x653E;&#x5728; <code>&lt;script&gt;</code> &#x4E0A;&#x597D;&#x4E86;:</p>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">pre</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;game-of-life-canvas&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">pre</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;./bootstrap.js&quot;</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+</code></pre>
+<p>&#x53E6;&#x5916;&#xFF0C;&#x6211;&#x4EEC;&#x60F3;&#x8981;&#x8FD9;&#x4E2A;<code>&lt;pre&gt;</code>&#xFF0C;&#x4EE5;&#x7F51;&#x9875;&#x4E2D;&#x95F4;&#x4E3A;&#x4E2D;&#x5FC3;. &#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x4F7F;&#x7528; CSS flex &#x6765;&#x5B8C;&#x6210;&#x8FD9;&#x9879;&#x4EFB;&#x52A1;&#x3002; &#x6DFB;&#x52A0;&#x4EE5;&#x4E0B;&#x5185;&#x5BB9;<code>&lt;style&gt;</code>&#xFF0C;&#x5230;<code>index.html</code>&#x7684;<code>&lt;head&gt;</code>&#x91CC;&#x9762;:</p>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">style</span>&gt;</span><span class="css">
+  <span class="hljs-selector-tag">body</span> {
+    <span class="hljs-attribute">position</span>: absolute;
+    <span class="hljs-attribute">top</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">left</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+    <span class="hljs-attribute">height</span>: <span class="hljs-number">100%</span>;
+    <span class="hljs-attribute">display</span>: flex;
+    <span class="hljs-attribute">flex-direction</span>: column;
+    <span class="hljs-attribute">align-items</span>: center;
+    <span class="hljs-attribute">justify-content</span>: center;
+  }
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span>
+</code></pre>
+<p>&#x5728;<code>wasm-game-of-life/www/index.js</code>&#x7684;&#x9876;&#x7AEF;&#xFF0C;&#x8BA9;&#x6211;&#x4EEC;&#x4FEE;&#x590D;&#x6211;&#x4EEC;&#x7684;&#x5BFC;&#x5165;&#x6765;&#x5F15;&#x5165;<code>Universe</code>&#xFF0C;&#x800C;&#x4E0D;&#x662F;&#x65E7;&#x7684;<code>greet</code>&#x51FD;&#x6570;:</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {Universe} <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;./wasm_game_of_life&apos;</span>;
+</code></pre>
+<p>&#x53E6;&#x5916;&#xFF0C;&#x83B7;&#x53D6;&#x6211;&#x4EEC;&#x521A;&#x52A0;&#x7684;<code>&lt;pre&gt;</code>&#x5143;&#x7D20;&#xFF0C;&#x5E76;&#x5B9E;&#x4F8B;&#x5316;&#x65B0; Universe &#x7684;&#x5143;&#x7D20;:</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> pre = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">&apos;game-of-life-canvas&apos;</span>);
+<span class="hljs-keyword">const</span> universe = Universe.new();
+</code></pre>
+<p>JavaScript &#x8FD0;&#x884C;&#x5728;[&#x4E00;&#x4E2A;<code>requestAnimationFrame</code>&#x5FAA;&#x73AF;][requestanimationframe]&#x3002; &#x5728;&#x6BCF;&#x6B21;&#x8FED;&#x4EE3;&#x4E2D;&#xFF0C;&#x5B83;&#x5C06;&#x5F53;&#x524D;&#x7684; Universe &#x7ED8;&#x5236;&#x5230;<code>&lt;pre&gt;</code>&#xFF0C;&#x7136;&#x540E;&#x8FD0;&#x884C;<code>Universe::tick</code>&#x3002;</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> renderLoop = () =&gt; {
+  pre.textContent = universe.render();
+  universe.tick();
+
+  requestAnimationFrame(renderLoop);
+};
+</code></pre>
+<p>&#x8981;&#x5F00;&#x59CB;&#x6E32;&#x67D3;&#x8FC7;&#x7A0B;&#xFF0C;&#x6211;&#x4EEC;&#x6240;&#x8981;&#x505A;&#x7684;&#x5C31;&#x662F;&#x4E3A;&#x6E32;&#x67D3;&#x5FAA;&#x73AF;&#x7684;&#x7B2C;&#x4E00;&#x6B21;&#x8FED;&#x4EE3;&#x8FDB;&#x884C;&#x521D;&#x59CB;&#x8C03;&#x7528;:</p>
+<pre><code class="lang-js">requestAnimationFrame(renderLoop);
+</code></pre>
+<p>&#x786E;&#x4FDD;&#x4F60;&#x7684;&#x5F00;&#x53D1;&#x670D;&#x52A1;&#x5668;&#x8FD8;&#x5728;&#x8FD0;&#x884C; (<code>wasm-game-of-life/www</code>&#x76EE;&#x5F55;&#x4E2D;&#xFF0C;&#x6267;&#x884C; <code>npm run start</code>
+) &#x548C;&#x8FD9;&#x5C31;&#x662F;<a href="http://localhost:8080/" target="_blank">http://localhost:8080/</a> &#x73B0;&#x5728;&#x7684;&#x6837;&#x5B50;:</p>
+<p><a href="images/game-of-life/initial-game-of-life-pre.png"><img src="images/game-of-life/initial-game-of-life-pre.png" alt="Screenshot of the Game of Life implementation with text rendering"></a></p>
+<h2 id="&#x76F4;&#x63A5;&#x4ECE;&#x5185;&#x5B58;&#x6E32;&#x67D3;&#x5230;-canvas">&#x76F4;&#x63A5;&#x4ECE;&#x5185;&#x5B58;&#x6E32;&#x67D3;&#x5230; Canvas</h2>
+<p>&#x5728; Rust &#x4E2D;&#x751F;&#x6210; (&#x548C;&#x5206;&#x914D;) &#x4E00;&#x4E2A;<code>String</code>&#xFF0C; &#x7136;&#x540E;&#x6709;<code>wasm-bindgen</code>&#x5C06;&#x5176;&#x8F6C;&#x6362;&#x4E3A;&#x6709;&#x6548;&#x7684; JavaScript &#x5B57;&#x7B26;&#x4E32; &#xFF0C;&#x6765;&#x4F1A;&#x751F;&#x6210; Universe &#x5355;&#x5143;&#x683C; &#x7684;&#x4E0D;&#x5FC5;&#x8981;&#x526F;&#x672C;&#x3002; &#x5176;&#x5B9E;&#x5728; JavaScript &#x4EE3;&#x7801; &#x77E5;&#x9053; Universe &#x7684;&#x5BBD;&#x5EA6;&#x548C;&#x9AD8;&#x5EA6;&#xFF0C;&#x5E76;&#x4E14;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x4ECE; JavaScript &#x4E2D;&#x8BFB;&#x53D6; WebAssembly &#x7EBF;&#x6027;&#x5185;&#x5B58; &#x4E2D;&#x7684;&#x5355;&#x5143;&#x683C;&#x5B57;&#x8282;&#xFF0C; &#x6211;&#x4EEC;&#x5C31;&#x53EF;&#x4EE5;&#x4FEE;&#x6539;<code>render</code>&#x65B9;&#x6CD5;&#xFF0C;&#x7528;&#x6765;&#x8FD4;&#x56DE; &#x5355;&#x5143;&#x6570;&#x7EC4;&#x7684;&#x5F00;&#x5934;&#x6307;&#x9488;&#x3002;</p>
+<p>&#x8FD8;&#x6709;&#xFF0C;&#x6211;&#x4EEC;&#x5C06;&#x5207;&#x6362;&#x5230;&#x4F7F;&#x7528;<a href="https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API" target="_blank">Canvas API</a>&#x3002; &#x800C;&#x4E0D;&#x662F;&#x6E32;&#x67D3; unicode &#x6587;&#x672C;&#x3002; &#x6211;&#x4EEC;&#x5C06;&#x5728;&#x672C;&#x6559;&#x7A0B;&#x7684;&#x5176;&#x4F59;&#x90E8;&#x5206;&#x4E2D;&#x4F7F;&#x7528;&#x6B64;&#x8BBE;&#x8BA1;&#x3002;</p>
+<p>&#x9996;&#x5148;&#xFF0C;&#x8BA9;&#x6211;&#x4EEC;&#x628A;<code>pre</code>&#xFF0C;&#x6362;&#x6210;&#x4E86;&#x4E00;&#x4E2A;<code>&lt;canvas&gt;</code> (&#x5B83;&#x4E5F;&#x5E94;&#x8BE5;&#x5728;<code>&lt;body&gt;</code>&#xFF0C; <code>&lt;script&gt;</code>&#x52A0;&#x8F7D;&#x6211;&#x4EEC;&#x7684; JavaScript &#x4E4B;&#x524D;) :</p>
+<p><code>wasm-game-of-life/www/index.html</code>&#x5185;&#xFF0C;&#x8BA9;&#x6211;&#x4EEC;&#x628A;&#x4E4B;&#x524D;&#x6DFB;&#x52A0;&#x7684;<code>&lt;pre&gt;</code>&#x6362;&#x6210;&#x51C6;&#x5907;&#x6E32;&#x67D3;&#x7684;&#x4E00;&#x4E2A;<code>&lt;canvas&gt;</code>(&#x5B83;&#x4E5F;&#x5E94;&#x8BE5;&#x5728;<code>&lt;body&gt;</code>&#xFF0C; &#x5728;<code>&lt;script&gt;</code>&#x52A0;&#x8F7D;&#x6211;&#x4EEC;&#x7684; JavaScript &#x4E4B;&#x524D;):</p>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">canvas</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;game-of-life-canvas&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">canvas</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;./bootstrap.js&quot;</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+</code></pre>
+<p>&#x4E3A;&#x4E86;&#x4ECE; Rust &#x5B9E;&#x73B0; &#x4E2D;&#x83B7;&#x53D6;&#x5FC5;&#x8981;&#x7684;&#x4FE1;&#x606F;&#xFF0C;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x4E3A; Universe &#x7684;&#x5BBD;&#x5EA6;&#xFF0C;&#x9AD8;&#x5EA6;&#x548C;&#x6307;&#x5411; &#x5176;&#x5355;&#x5143;&#x6570;&#x7EC4; &#x7684;&#x6307;&#x9488; &#x6DFB;&#x52A0;&#x66F4;&#x591A;&#x7684;&#x4E00;&#x4E9B; <code>getter</code>&#x51FD;&#x6570;&#x3002; &#x6240;&#x6709;&#x8FD9;&#x4E9B;&#x90FD;&#x66B4;&#x9732;&#x5728; JavaScript &#x4E2D;&#x3002;&#x6DFB;&#x52A0;&#x8FD9;&#x4E9B;&#x5185;&#x5BB9;<code>wasm-game-of-life/src/lib.rs</code>:</p>
+<pre><code class="lang-rust"><span class="hljs-comment">/// Public methods&#xFF0C; exported to JavaScript.</span>
+<span class="hljs-meta">#[wasm_bindgen]</span>
+<span class="hljs-keyword">impl</span> Universe {
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">width</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; <span class="hljs-keyword">u32</span> {
+        <span class="hljs-keyword">self</span>.width
+    }
+
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">height</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; <span class="hljs-keyword">u32</span> {
+        <span class="hljs-keyword">self</span>.height
+    }
+
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">cells</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; *<span class="hljs-keyword">const</span> Cell {
+        <span class="hljs-keyword">self</span>.cells.as_ptr()
+    }
+}
+</code></pre>
+<p>&#x63A5;&#x4E0B;&#x6765;&#xFF0C;&#x5728;<code>wasm-game-of-life/www/index.js</code>&#xFF0C;&#x6211;&#x4EEC;&#x4E5F;&#x4ECE;<code>wasm-game-of-life</code>&#x5BFC;&#x5165;<code>Cell</code>&#xFF0C;&#x548C;&#x8BA9;&#x6211;&#x4EEC;&#x5B9A;&#x4E49; JavaScript &#x5728;&#x6E32;&#x67D3; Canvas &#x65F6;&#x5C06;&#x4F7F;&#x7528;&#x7684;&#x4E00;&#x4E9B;&#x5E38;&#x91CF;:</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {Universe, Cell} <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;wasm-game-of-life&apos;</span>;
+
+<span class="hljs-keyword">const</span> CELL_SIZE = <span class="hljs-number">5</span>; <span class="hljs-comment">// px</span>
+<span class="hljs-keyword">const</span> GRID_COLOR = <span class="hljs-string">&apos;#CCCCCC&apos;</span>;
+<span class="hljs-keyword">const</span> DEAD_COLOR = <span class="hljs-string">&apos;#FFFFFF&apos;</span>;
+<span class="hljs-keyword">const</span> ALIVE_COLOR = <span class="hljs-string">&apos;#000000&apos;</span>;
+</code></pre>
+<p>&#x73B0;&#x5728;&#xFF0C;&#x8BA9;&#x6211;&#x4EEC;&#x91CD;&#x5199;&#x5F53;&#x524D;&#x7684; JS &#x4EE3;&#x7801; (&#x5BFC;&#x5165;&#x9664;&#x5916;) &#xFF0C;&#x4E0D;&#x518D;&#x5199;&#x5165;<code>&lt;pre&gt;</code>&#x7684;<code>textContent</code>&#xFF0C;&#x800C;&#x662F;&#x4E13;&#x6CE8;&#x5728;<code>&lt;canvas&gt;</code>:</p>
+<pre><code class="lang-js"><span class="hljs-comment">// &#x6784;&#x9020; the universe&#xFF0C; and get its width and height.</span>
+<span class="hljs-keyword">const</span> universe = Universe.new();
+<span class="hljs-keyword">const</span> width = universe.width();
+<span class="hljs-keyword">const</span> height = universe.height();
+
+<span class="hljs-comment">// Give the canvas room for all of our cells and a 1px border</span>
+<span class="hljs-comment">// around each of them.</span>
+<span class="hljs-keyword">const</span> canvas = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">&apos;game-of-life-canvas&apos;</span>);
+canvas.height = (CELL_SIZE + <span class="hljs-number">1</span>) * height + <span class="hljs-number">1</span>;
+canvas.width = (CELL_SIZE + <span class="hljs-number">1</span>) * width + <span class="hljs-number">1</span>;
+
+<span class="hljs-keyword">const</span> ctx = canvas.getContext(<span class="hljs-string">&apos;2d&apos;</span>);
+
+<span class="hljs-keyword">const</span> renderLoop = () =&gt; {
+  universe.tick();
+
+  drawGrid();
+  drawCells();
+
+  requestAnimationFrame(renderLoop);
+};
+</code></pre>
+<p>&#x4E3A;&#x4E86;&#x5728;&#x5355;&#x5143;&#x683C;&#x4E4B;&#x95F4;&#x7ED8;&#x5236;&#x7F51;&#x683C;&#xFF0C;&#x6211;&#x4EEC;&#x7ED8;&#x5236; &#x4E00;&#x7EC4;&#x7B49;&#x95F4;&#x9694; &#x7684; &#x6C34;&#x5E73;&#x7EBF; &#x548C; &#x4E00;&#x7EC4;&#x7B49;&#x95F4;&#x8DDD; &#x7684; &#x5782;&#x76F4;&#x7EBF;&#x3002; &#x8FD9;&#x4E9B;&#x7EBF; &#x7EB5;&#x6A2A;&#x4EA4;&#x9519; &#x5F62;&#x6210;&#x7F51;&#x683C;&#x3002;</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> drawGrid = () =&gt; {
+  ctx.beginPath();
+  ctx.lineWidth = <span class="hljs-number">1</span> / <span class="hljs-built_in">window</span>.devicePixelRatio;
+  ctx.strokeStyle = GRID_COLOR;
+
+  <span class="hljs-comment">// Vertical lines.</span>
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt;= width; i++) {
+    ctx.moveTo(i * (CELL_SIZE + <span class="hljs-number">1</span>) + <span class="hljs-number">1</span>, <span class="hljs-number">0</span>);
+    ctx.lineTo(i * (CELL_SIZE + <span class="hljs-number">1</span>) + <span class="hljs-number">1</span>, (CELL_SIZE + <span class="hljs-number">1</span>) * height + <span class="hljs-number">1</span>);
+  }
+
+  <span class="hljs-comment">// Horizontal lines.</span>
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> j = <span class="hljs-number">0</span>; j &lt;= height; j++) {
+    ctx.moveTo(<span class="hljs-number">0</span>, j * (CELL_SIZE + <span class="hljs-number">1</span>) + <span class="hljs-number">1</span>);
+    ctx.lineTo((CELL_SIZE + <span class="hljs-number">1</span>) * width + <span class="hljs-number">1</span>, j * (CELL_SIZE + <span class="hljs-number">1</span>) + <span class="hljs-number">1</span>);
+  }
+
+  ctx.stroke();
+};
+</code></pre>
+<!-- HERE -->
+<p>&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x901A;&#x8FC7;<code>memory</code>&#x62FF;&#x5230; WebAssembly &#x7684; &#x7EBF;&#x6027;&#x5185;&#x5B58;&#xFF0C; &#x800C;&#x8FD9;&#x4E2A;<code>memory</code>&#x7531;&#x539F;&#x751F; wasm &#x6A21;&#x5757;<code>wasm_game_of_life_bg</code>&#x63D0;&#x4F9B;&#x3002;&#x4E3A;&#x4E86;&#x7ED8;&#x5236; &#x5355;&#x5143;&#x683C;&#xFF0C;&#x6211;&#x4EEC;&#x62FF;&#x5230; <code>universe&apos;s cells</code> &#x7684;&#x6307;&#x9488; &#xFF0C;&#x6784;&#x9020;&#x4E00;&#x4E2A;&#x8986;&#x76D6;&#x5355;&#x5143;&#x683C;&#x7F13;&#x5B58;&#x7684;<code>Uint8Array</code>&#xFF0C;&#x8FED;&#x4EE3;&#x6BCF;&#x4E2A;&#x5355;&#x5143;&#x683C;&#xFF0C;&#x5E76;&#x5206;&#x522B;&#x6839;&#x636E; &#x5355;&#x5143;&#x683C;&#x662F;&#x6B7B;&#x8FD8;&#x662F;&#x6D3B;&#xFF0C;&#x7ED8;&#x5236;&#x767D;&#x8272;&#x6216;&#x9ED1;&#x8272;&#x77E9;&#x5F62;&#x3002; &#x901A;&#x8FC7;&#x4F7F;&#x7528; &#x6307;&#x9488; &#x548C; &#x8986;&#x76D6;&#xFF0C;&#x6211;&#x4EEC;&#x907F;&#x514D;&#x5728;&#x6BCF;&#x6B21;<code>tick</code>&#x4E0A;&#x8DE8;&#x8FB9;&#x754C;&#x590D;&#x5236;&#x5355;&#x5143;&#x683C;&#x3002;</p>
+<pre><code class="lang-js"><span class="hljs-comment">// &#x6587;&#x4EF6;&#x9876;&#x90E8;&#xFF0C;&#x5BFC;&#x5165; WebAssembly memory</span>
+<span class="hljs-keyword">import</span> {memory} <span class="hljs-keyword">from</span> <span class="hljs-string">&apos;./wasm_game_of_life_bg&apos;</span>;
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">const</span> getIndex = (row, column) =&gt; {
+  <span class="hljs-keyword">return</span> row * width + column;
+};
+
+<span class="hljs-keyword">const</span> drawCells = () =&gt; {
+  <span class="hljs-keyword">const</span> cellsPtr = universe.cells(); <span class="hljs-comment">// &lt; universe&apos;s cells</span>
+  <span class="hljs-keyword">const</span> cells = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Uint8Array</span>(memory.buffer, cellsPtr, width * height);
+
+  ctx.beginPath();
+
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> row = <span class="hljs-number">0</span>; row &lt; height; row++) {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> col = <span class="hljs-number">0</span>; col &lt; width; col++) {
+      <span class="hljs-keyword">const</span> idx = getIndex(row, col);
+
+      ctx.fillStyle = cells[idx] === DEAD ? DEAD_COLOR : ALIVE_COLOR;
+
+      ctx.fillRect(
+        col * (CELL_SIZE + <span class="hljs-number">1</span>) + <span class="hljs-number">1</span>,
+        row * (CELL_SIZE + <span class="hljs-number">1</span>) + <span class="hljs-number">1</span>,
+        CELL_SIZE,
+        CELL_SIZE
+      );
+    }
+  }
+
+  ctx.stroke();
+};
+</code></pre>
+<p>&#x8981;&#x5F00;&#x59CB;&#x6E32;&#x67D3;&#x8FC7;&#x7A0B;&#xFF0C;&#x6211;&#x4EEC;&#x5C06;&#x4F7F;&#x7528;&#x4E0E; &#x4E0A;&#x90E8;&#x5206;&#x76F8;&#x540C;&#x7684;&#x4EE3;&#x7801; &#xFF0C;&#x6765;&#x5F00;&#x59CB;&#x6E32;&#x67D3;&#x5FAA;&#x73AF;&#x7684;&#x7B2C;&#x4E00;&#x6B21;&#x8FED;&#x4EE3;:</p>
+<pre><code class="lang-js">requestAnimationFrame(renderLoop);
+</code></pre>
+<p>&#x8BF7;&#x6CE8;&#x610F;&#xFF0C;&#x5728;&#x6267;&#x884C;<code>requestAnimationFrame()</code><em>&#x4E4B;&#x524D;</em>&#xFF0C;&#x6211;&#x4EEC;&#x8981;&#x8C03;&#x7528;<code>drawGrid()</code>&#x548C;<code>drawCells()</code>&#x3002;&#x6211;&#x4EEC;&#x8FD9;&#x6837;&#x505A;&#x7684;&#x539F;&#x56E0;&#x662F;&#xFF0C;&#x5728;&#x6211;&#x4EEC;&#x8FDB;&#x884C;&#x4FEE;&#x6539;&#x4E4B;&#x524D;&#xFF0C;&#x7ED8;&#x5236;&#x5B87;&#x5B99;&#x7684;<em>&#x521D;&#x59CB;</em>&#x72B6;&#x6001;&#x3002;&#x5982;&#x679C;&#x6211;&#x4EEC;&#x6539;&#x4E3A;&#x7B80;&#x5355;&#x5730;&#x8C03;&#x7528;<code>requestAnimationFrame(renderLoop)</code>&#xFF0C;&#x6211;&#x4EEC;&#x6700;&#x7EC8;&#x5F97;&#x5230;&#x7684;&#x7B2C;&#x4E00;&#x5E27;&#x5B9E;&#x9645;&#x7684;&#x7ED8;&#x5236;&#x60C5;&#x51B5;&#x662F;&#xFF0C;&#x5728;&#x7B2C;&#x4E00;&#x6B21;&#x8C03;&#x7528;<code>universe.tick()</code><em>&#x540E;</em>&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x8FD9;&#x4E9B;&#x5355;&#x5143;&#x683C;&#x751F;&#x547D;&#x72B6;&#x6001;&#x7684;<strong>&#x7B2C;&#x4E8C;&#x6B21;</strong>&quot;tick&quot;&#x3002;</p>
+<h2 id="&#x5B83;&#x5DE5;&#x4F5C;&#x4E86;">&#x5B83;&#x5DE5;&#x4F5C;&#x4E86;!</h2>
+<p>&#x901A;&#x8FC7;&#x5728;&#x6839;<code>wasm-game-of-life</code>&#x76EE;&#x5F55;&#x4E2D;&#x8FD0;&#x884C;&#x6B64;&#x547D;&#x4EE4;&#xFF0C;&#x6765;&#x91CD;&#x6784;&#x5EFA; WebAssembly &#x548C;&#x7ED1;&#x5B9A;&#x7C98;&#x5408;&#x5242;:</p>
+<pre><code>wasm-pack build
+</code></pre><p>&#x786E;&#x4FDD;&#x60A8;&#x7684;&#x5F00;&#x53D1;&#x670D;&#x52A1;&#x5668;&#x4ECD;&#x5728;&#x8FD0;&#x884C;&#x3002;&#x82E5;&#x6CA1;&#x6709;&#xFF0C;&#x8BF7;&#x4ECE;<code>wasm-game-of-life/www</code>&#x76EE;&#x5F55;&#x5185;&#x90E8;&#x518D;&#x6B21;&#x542F;&#x52A8;:</p>
+<pre><code>npm run start
+</code></pre><p>&#x5982;&#x679C;&#x4F60;&#x5237;&#x65B0;<a href="http://localhost:8080/" target="_blank">http://localhost:8080/</a>&#xFF0C;&#x4F60;&#x5E94;&#x8BE5;&#x53D7;&#x5230;&#x4EE4;&#x4EBA;&#x5174;&#x594B;&#x7684;&#x5C55;&#x793A;!</p>
+<p><a href="images/game-of-life/initial-game-of-life.png"><img src="images/game-of-life/initial-game-of-life.png" alt="Screenshot of the Game of Life implementation"></a></p>
+<p>&#x60A8;&#x53EF;&#x4EE5; checkout <code>chapter-one</code> &#x5206;&#x652F; &#x627E;&#x5230;&#x5B8C;&#x6574;&#x4EE3;&#x7801;.</p>
+<p>&#x8FD8;&#x6709;&#x4E00;&#x4E2A;&#x975E;&#x5E38;&#x5DE7;&#x5999;&#x7684;&#x7B97;&#x6CD5;&#xFF0C;&#x6765;&#x5B9E;&#x73B0;&#x751F;&#x547D;&#x6E38;&#x620F;&#xFF0C;&#x53EB;&#x505A;<a href="https://en.wikipedia.org/wiki/Hashlife" target="_blank">hashlife</a>&#x3002; &#x5B83;&#x4F7F;&#x7528;&#x79EF;&#x6781;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x5B9E;&#x9645;&#x4E0A;&#x8BA1;&#x7B97;&#x540E;&#x4EE3;&#x7684;&#x65F6;&#x95F4;&#x8D8A;&#x957F;&#xFF0C;&#x83B7;&#x5F97;&#x7684;<em>&#x6307;&#x6570;&#x7EA7;&#x66F4;&#x5FEB;</em>! &#x9274;&#x4E8E;&#x6B64;&#xFF0C;&#x60A8;&#x53EF;&#x80FD;&#x60F3;&#x77E5;&#x9053;&#x4E3A;&#x4EC0;&#x4E48;&#x6211;&#x4EEC;&#x5728;&#x672C;&#x6559;&#x7A0B;&#x4E2D;&#x6CA1;&#x6709;&#x5B9E;&#x73B0;<code>hashlife</code>&#x3002; &#x56E0;&#x4E3A;&#x5B83;&#x8D85;&#x51FA;&#x4E86;&#x672C;&#x6587;&#x7684;&#x8303;&#x56F4;&#xFF0C;&#x6211;&#x4EEC;&#x4E13;&#x6CE8;&#x4E8E; Rust &#x548C; WebAssembly &#x96C6;&#x6210;&#xFF0C;&#x4F46;&#x6211;&#x4EEC;&#x5F3A;&#x70C8;&#x5EFA;&#x8BAE;&#x60A8;&#x81EA;&#x5DF1;&#x53BB;&#x4E86;&#x89E3;<code>hashlife</code>!</p>
+<h2 id="&#x7EC3;&#x4E60;">&#x7EC3;&#x4E60;</h2>
+<ul>
+<li><p>&#x4F7F;&#x7528;&#x5355;&#x4E2A;&#x592A;&#x7A7A;&#x98DE;&#x8239;&#xFF0C;&#x521D;&#x59CB;&#x5316;&#x5B87;&#x5B99;.</p>
+</li>
+<li><p>&#x4E0D;&#x662F;&#x786C;&#x7F16;&#x7801;&#x6700;&#x521D;&#x7684;&#x5B87;&#x5B99;&#xFF0C;&#x800C;&#x662F;&#x751F;&#x6210;&#x4E00;&#x4E2A;&#x968F;&#x673A;&#x7684;&#xFF0C;&#x6709;&#x4E94;&#x5341;&#x4E94;&#x4E2A;&#x5355;&#x5143;&#x683C;&#x6D3B;&#x7740;&#x6216;&#x6B7B;&#x4EA1;&#x7684;&#x673A;&#x4F1A;.</p>
+<p><em>&#x63D0;&#x793A;:&#x4F7F;&#x7528;<a href="https://crates.io/crates/js-sys" target="_blank"><code>js-sys</code>&#x7BB1;</a>&#x5BFC;&#x5165;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random" target="_blank"><code>Math.random</code>JavaScript &#x51FD;&#x6570;</a>.</em></p>
+<details>
+  <summary>&#x7B54;&#x6848;</summary>
+  *&#x9996;&#x5148;&#xFF0C;&#x5728; `wasm-game-of-life/Cargo.toml`&#x6DFB;&#x52A0;&#x4F9D;&#x8D56;:*
+
+```toml
+# ...
+[dependencies]
+js-sys = &quot;0.3&quot;
+# ...
+```
+
+_&#x7136;&#x540E;&#xFF0C;&#x4F7F;&#x7528;`js_sys::Math::random`&#x7FFB;&#x8F6C;&#x786C;&#x5E01;&#x7684;&#x51FD;&#x6570;:_
+
+```rust
+extern crate js_sys;
+
+// ...
+
+if js_sys::Math::random() &lt; 0.5 {
+    // Alive...
+} else {
+    // Dead...
+}
+```
+
+</details>
+</li>
+<li><p>&#x7528; &#x4E00;&#x4E2A;&#x5B57;&#x8282; &#x8868;&#x793A; &#x6BCF;&#x4E2A;&#x5355;&#x5143;&#x683C; &#x53EF;&#x4EE5;&#x5F88;&#x5BB9;&#x6613;&#x5730;&#x8FED;&#x4EE3;&#x5355;&#x5143;&#x683C;&#xFF0C;&#x4F46;&#x8FD9;&#x662F;&#x4EE5;&#x6D6A;&#x8D39;&#x5185;&#x5B58;&#x4E3A;&#x4EE3;&#x4EF7;&#x7684;. &#x6BCF;&#x4E2A;&#x5B57;&#x8282;&#x662F; 8 &#x4F4D;&#xFF0C;&#x4F46;&#x6211;&#x4EEC;&#x53EA;&#x9700;&#x8981; &#x4E00;&#x4E2A;&#x4F4D; &#x6765;&#x8868;&#x793A;&#x6BCF;&#x4E2A;&#x5355;&#x5143; &#x662F;&#x6D3B;&#x8FD8;&#x662F;&#x6B7B;. &#x91CD;&#x6784;&#x6570;&#x636E;&#x8868;&#x793A;&#xFF0C;&#x4EE5;&#x4FBF;&#x6BCF;&#x4E2A;&#x5355;&#x5143;&#xFF0C;&#x4EC5;&#x4F7F;&#x7528;&#x4E00;&#x4E2A;&#x7A7A;&#x683C;&#x4F4D;.</p>
+</li>
+</ul>
+<details>
+    <summary>&#x7B54;&#x6848;</summary>
+
+&#x5728; Rust &#x4E2D;&#xFF0C;&#x60A8;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;[`fixedbitset`&#x7BB1;&#x5B50;&#x548C;&#x5B83;&#x7684;`FixedBitSet`&#x7C7B;&#x578B;](https://crates.io/crates/fixedbitset)&#xFF0C;&#x6765;&#x8868;&#x793A;&#x5355;&#x5143;&#x683C;&#xFF0C;&#x4EE3;&#x66FF;`Vec<cell>`:
+
+```rust
+// &#x786E;&#x4FDD;&#x4F60;&#x6DFB;&#x52A0;&#x6B64;&#x4F9D;&#x8D56;&#x5230;&#x4E86; Cargo.toml!
+extern crate fixedbitset;
+use fixedbitset::FixedBitSet;
+
+// ...
+
+#[wasm_bindgen]
+pub struct Universe {
+    width: u32,
+    height: u32,
+    cells: FixedBitSet,
+}
+```
+
+&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x4EE5;&#x4E0B;&#x65B9;&#x5F0F;&#x8C03;&#x6574; Universe &#x6784;&#x9020;&#x51FD;&#x6570;:
+
+```rust
+pub fn new() -&gt; Universe {
+    let width = 64;
+    let height = 64;
+
+    let size = (width * height) as usize;
+    let mut cells = FixedBitSet::with_capacity(size);
+
+    for i in 0..size {
+        cells.set(i, i % 2 == 0 || i % 7 == 0);
+    }
+
+    Universe {
+        width,
+        height,
+        cells,
+    }
+}
+```
+
+&#x8981;&#x66F4;&#x65B0;&#x5B87;&#x5B99;&#x7684;&#x4E0B;&#x4E00;&#x4E2A; tick &#x4E2D;&#x7684;&#x5355;&#x5143;&#x683C;&#xFF0C;&#x6211;&#x4EEC;&#x4F7F;&#x7528;`FixedBitSet`&#x7684;`set`&#x65B9;&#x6CD5;:
+
+```rust
+next.set(idx, match (cell, live_neighbors) {
+    (true, x) if x &lt; 2 =&gt; false,
+    (true, 2) | (true, 3) =&gt; true,
+    (true, x) if x &gt; 3 =&gt; false,
+    (false, 3) =&gt; true,
+    (otherwise, _) =&gt; otherwise
+});
+```
+
+&#x8981;&#x5C06;&#x6307;&#x5411;&#x5F00;&#x5934;&#x4F4D;&#x7684;&#x6307;&#x9488;&#x4F20;&#x9012;&#x7ED9; JavaScript&#xFF0C;&#x60A8;&#x53EF;&#x4EE5;&#x8F6C;&#x6362;`FixedBitSet`&#x5230;&#x5207;&#x7247;&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x5207;&#x7247;&#x8F6C;&#x6362;&#x4E3A;&#x6307;&#x9488;:
+
+```rust
+#[wasm_bindgen]
+impl Universe {
+    // ...
+
+    pub fn cells(&amp;self) -&gt; *const u32 {
+        self.cells.as_slice().as_ptr()
+    }
+}
+```
+
+&#x5728; JavaScript &#x4E2D;&#xFF0C;&#x6784;&#x5EFA; Wasm &#x7684;&#x5185;&#x5B58;&#x6210;&#x4E00;&#x4E2A;`Uint8Array`&#xFF0C;&#x4E0E;&#x4E4B;&#x524D;&#x76F8;&#x540C;&#xFF0C;&#x53EA;&#x662F;&#x6570;&#x7EC4;&#x7684;&#x957F;&#x5EA6;&#x4E0D;&#x518D;&#x662F;`width * height`&#xFF0C;&#x800C;&#x662F;`width * height / 8`&#xFF0C;&#x56E0;&#x4E3A;&#x6211;&#x4EEC;&#x4E00;&#x4E2A; &#x4F4D; &#x6709;&#x4E00;&#x4E2A;&#x5355;&#x5143;&#xFF0C;&#x800C;&#x4E0D;&#x662F;&#x5B57;&#x8282;(8 &#x4F4D;):
+
+```js
+const cells = new Uint8Array(memory.buffer, cellsPtr, (width * height) / 8);
+```
+
+&#x7ED9;&#x51FA;&#x4E00;&#x4E2A;&#x7D22;&#x5F15;&#x548C;`Uint8Array`&#xFF0C;&#x4F60;&#x53EF;&#x4EE5;&#x786E;&#x5B9A;&#x662F;&#x5426;&#x4F7F;&#x7528;&#x4EE5;&#x4E0B;&#x51FD;&#x6570;&#x8BBE;&#x7F6E; _n<sup>th</sup>_ &#x4F4D;:
+
+```js
+const bitIsSet = (n, arr) =&gt; {
+  let byte = Math.floor(n / 8);
+  let mask = 1 &lt;&lt; n % 8;
+  return (arr[byte] &amp; mask) === mask;
+};
+```
+
+&#x9274;&#x4E8E;&#x6B64;&#xFF0C;&#x65B0;&#x7248;&#x672C;`drawCells`&#x770B;&#x8D77;&#x6765;&#x50CF;&#x8FD9;&#x6837;:
+
+```js
+const drawCells = () =&gt; {
+  const cellsPtr = universe.cells();
+
+  // &#x8FD9;&#x65F6;&#xFF0C;&#x5DF2;&#x66F4;&#x65B0;
+  const cells = new Uint8Array(memory.buffer, cellsPtr, (width * height) / 8);
+
+  ctx.beginPath();
+
+  for (let row = 0; row &lt; height; row++) {
+    for (let col = 0; col &lt; width; col++) {
+      const idx = getIndex(row, col);
+
+      // This is updated!
+      ctx.fillStyle = bitIsSet(idx, cells) ? ALIVE_COLOR : DEAD_COLOR;
+
+      ctx.fillRect(
+        col * (CELL_SIZE + 1) + 1,
+        row * (CELL_SIZE + 1) + 1,
+        CELL_SIZE,
+        CELL_SIZE
+      );
+    }
+  }
+
+  ctx.stroke();
+};
+```
+
+  </cell></details>
+
+                                
+                                </section>
+                                <ins class="adsbygoogle"
+                                     style="display:block"
+                                     data-ad-client="ca-pub-9312750344484857"
+                                     data-ad-slot="2669241897"
+                                     data-ad-format="auto"
+                                     data-full-width-responsive="true"></ins>
+                                <script>
+                                     (adsbygoogle = window.adsbygoogle || []).push({});
+                                </script>                                
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="rules.html" class="navigation navigation-prev " aria-label="上一页: 规则们">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="testing.html" class="navigation navigation-next " aria-label="下一页: 测试 生命">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            <a href="../">
+            
+                    
+                    介绍
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../why-rust-and-webassembly.html">
+            <a href="../why-rust-and-webassembly.html">
+            
+                    
+                    为啥 Rust 要与 WebAssembly 合作?
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="../background-and-concepts.html">
+            <a href="../background-and-concepts.html">
+            
+                    
+                    背景和概念
+            </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.3.1" data-path="../what-is-webassembly.html">
+            <a href="../what-is-webassembly.html">
+            
+                    
+                    什么是 WebAssembly?
+            </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="./">
+            <a href="./">
+            
+                    
+                    教程
+            </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.1.1" data-path="setup.html">
+            <a href="setup.html">
+            
+                    
+                    安装
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.2" data-path="hello-world.html">
+            <a href="hello-world.html">
+            
+                    
+                    Hello, World!
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.3" data-path="rules.html">
+            <a href="rules.html">
+            
+                    
+                    规则们
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="2.1.4" data-path="implementing.html">
+            <a href="implementing.html">
+            
+                    
+                    实现康威的生命游戏
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.5" data-path="testing.html">
+            <a href="testing.html">
+            
+                    
+                    测试 生命
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.6" data-path="debugging.html">
+            <a href="debugging.html">
+            
+                    
+                    调试
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.7" data-path="interactivity.html">
+            <a href="interactivity.html">
+            
+                    
+                    添加 交互性
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.8" data-path="time-profiling.html">
+            <a href="time-profiling.html">
+            
+                    
+                    时间 分析
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.9" data-path="code-size.html">
+            <a href="code-size.html">
+            
+                    
+                    收缩 .wasm 尺寸
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.10" data-path="publishing-to-npm.html">
+            <a href="publishing-to-npm.html">
+            
+                    
+                    发布到 npm
+            </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../reference/">
+            <a href="../reference/">
+            
+                    
+                    参考
+            </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="../reference/crates.html">
+            <a href="../reference/crates.html">
+            
+                    
+                    你应该知道的 Crates(箱) 
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="../reference/tools.html">
+            <a href="../reference/tools.html">
+            
+                    
+                    你应该知道的 工具 
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.3" data-path="../reference/project-templates.html">
+            <a href="../reference/project-templates.html">
+            
+                    
+                    项目模版 Templates
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.4" data-path="../reference/debugging.html">
+            <a href="../reference/debugging.html">
+            
+                    
+                    调试
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.5" data-path="../reference/time-profiling.html">
+            <a href="../reference/time-profiling.html">
+            
+                    
+                    时间 分析
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.6" data-path="../reference/code-size.html">
+            <a href="../reference/code-size.html">
+            
+                    
+                    收缩 .wasm 尺寸
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.7" data-path="../reference/js-ffi.html">
+            <a href="../reference/js-ffi.html">
+            
+                    
+                    javascript 互操作
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.8" data-path="../reference/which-crates-work-with-wasm.html">
+            <a href="../reference/which-crates-work-with-wasm.html">
+            
+                    
+                    哪些 现成的(crates)箱能与 WebAssembly 合作？
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.9" data-path="../reference/add-wasm-support-to-crate.html">
+            <a href="../reference/add-wasm-support-to-crate.html">
+            
+                    
+                    如何向通用 箱 添加 WebAssembly 支持
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.10" data-path="../reference/deploying-to-production.html">
+            <a href="../reference/deploying-to-production.html">
+            
+                    
+                    将 Rust 和 Webassembly 部署到生产中
+            </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://book.comptechs.cn" target="_blank" class="gitbook-link"><strong>开源图书(OpenBooks)</strong></a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"实现康威的生命游戏","level":"2.1.4","depth":2,"next":{"title":"测试 生命","level":"2.1.5","depth":2,"path":"game-of-life/testing.md","ref":"./game-of-life/testing.md","articles":[]},"previous":{"title":"规则们","level":"2.1.3","depth":2,"path":"game-of-life/rules.md","ref":"./game-of-life/rules.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-vmlite@git+https://github.com/vmlite/gitbook-plugin-theme-vmlite.git"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-vmlite":{"showLevel":false,"styles":{"ebook":"styles/ebook.css","epub":"styles/epub.css","mobi":"styles/mobi.css","pdf":"styles/pdf.css","print":"styles/print.css","website":"styles/website.css"}},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Rust开发WebAssembly技术","language":"zh-hans","gitbook":"*"},"file":{"path":"game-of-life/implementing.md","mtime":"2020-10-19T01:03:43.630Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-10-19T01:04:13.871Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/gitbook.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/theme.js"></script>
+    
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-152683495-1"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'UA-152683495-1'); 
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?b6193f769a96b5f12f441649fc8d4e49";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+        </script>
+    </body>
+</html>
+

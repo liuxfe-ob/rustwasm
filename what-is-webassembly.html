@@ -1,0 +1,585 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <title>什么是 WebAssembly? - Rust开发WebAssembly技术 - 开源图书(OpenBooks)</title>
+        
+        <meta name="description" content="">
+        
+        
+        <script data-ad-client="ca-pub-9312750344484857" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/style.css">
+
+    
+            
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-search/search.css">
+                
+            
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/images/favicon.ico" type="image/x-icon">
+
+    <link rel="next" href="game-of-life/" />
+    <link rel="prev" href="background-and-concepts.html" />
+
+    </head>
+    <body>
+        
+<div class="book">  
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+	<a href="/" class="btn pull-left" aria-label="开源图书(OpenBooks)"><i class="fa fa-home"></i></a>
+    
+
+    <!-- Title -->
+    <h1><i class="fa fa-circle-o-notch fa-spin"></i><a href="." >什么是 WebAssembly?</a></h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <ins class="adsbygoogle"
+                                     style="display:block"
+                                     data-ad-client="ca-pub-9312750344484857"
+                                     data-ad-slot="2669241897"
+                                     data-ad-format="auto"
+                                     data-full-width-responsive="true"></ins>
+                                <script>
+                                     (adsbygoogle = window.adsbygoogle || []).push({});
+                                </script>
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="webassemblys-&#x662F;&#x4EC0;&#x4E48;">WebAssemblys &#x662F;&#x4EC0;&#x4E48;?</h1>
+<p>WebAssembly(wasm)&#x662F;&#x4E00;&#x4E2A;&#x7B80;&#x5355;&#x7684;&#x673A;&#x5668;&#x6A21;&#x578B;&#x548C;&#x53EF;&#x6267;&#x884C;&#x683C;&#x5F0F;<a href="https://webassembly.github.io/spec/" target="_blank">&#x5E7F;&#x6CDB;&#x7684;&#x89C4;&#x8303;</a>&#x3002;&#x8BBE;&#x8BA1;&#x6210;&#x4FBF;&#x643A;&#xFF0C;&#x7D27;&#x51D1;&#xFF0C;&#x5E76;&#x4EE5;&#x539F;&#x751F;&#x901F;&#x5EA6;&#x6216;&#x63A5;&#x8FD1;&#x539F;&#x59CB;&#x901F;&#x5EA6;&#x6267;&#x884C;&#x3002;</p>
+<p>&#x4F5C;&#x4E3A;&#x4E00;&#x79CD;&#x7F16;&#x7A0B;&#x8BED;&#x8A00;&#xFF0C;WebAssembly &#x7531;&#x4E24;&#x79CD;&#x8868;&#x793A;&#x76F8;&#x540C;&#x7ED3;&#x6784;&#x7684;&#x683C;&#x5F0F;&#x7EC4;&#x6210;&#xFF0C;&#x5C3D;&#x7BA1;&#x65B9;&#x5F0F;&#x4E0D;&#x540C;:</p>
+<ul>
+<li><ol>
+<li>&#x8BE5;<code>.wat</code>&#x6587;&#x5B57;&#x683C;&#x5F0F;(&#x79F0;&#x4E3A;<code>wat</code>&#x4E3A;&quot;<strong>W</strong>eb<strong>A</strong>ssembly <strong>T</strong>ext&quot;)&#x4F7F;&#x7528;<a href="https://en.wikipedia.org/wiki/S-expression" target="_blank">S &#x8868;&#x8FBE;&#x5F0F;</a>&#x3002;&#x4E0E; Lisp &#x8BED;&#x8A00;&#x7CFB;&#x5217;&#x6709;&#x4E00;&#x4E9B;&#x76F8;&#x4F3C;&#x4E4B;&#x5904;&#x3002;&#x6BD4;&#x5982; Scheme &#x548C; Clojure&#x3002;</li>
+</ol>
+</li>
+<li><ol>
+<li>&#x8BE5;<code>.wasm</code>&#x4E8C;&#x8FDB;&#x5236;&#x683C;&#x5F0F;&#x662F;&#x8F83;&#x4F4E;&#x7EA7;&#x522B;&#x7684;&#xFF0C;&#x65E8;&#x5728;&#x7531; wasm &#x865A;&#x62DF;&#x673A;&#x76F4;&#x63A5;&#x4F7F;&#x7528;&#x3002;&#x5B83;&#x5728;&#x6982;&#x5FF5;&#x4E0A;&#x7C7B;&#x4F3C;&#x4E8E; ELF &#x548C; Mach-O&#x3002;</li>
+</ol>
+</li>
+</ul>
+<p>&#x4F5C;&#x4E3A;&#x53C2;&#x8003;&#xFF0C;&#x8FD9;&#x91CC;&#x662F;&#x4E00;&#x4E2A;&#x9636;&#x4E58;&#x51FD;&#x6570;<code>wat</code>:</p>
+<pre><code>(module
+  (func $fac (param f64) (result f64)
+    get_local 0
+    f64.const 1
+    f64.lt
+    if (result f64)
+      f64.const 1
+    else
+      get_local 0
+      get_local 0
+      f64.const 1
+      f64.sub
+      call $fac
+      f64.mul
+    end)
+  (export &quot;fac&quot; (func $fac)))
+</code></pre><p>&#x5982;&#x679C;&#x4F60;&#x5BF9;<code>wasm</code>&#x6587;&#x4EF6;&#x597D;&#x5947;&#xFF0C;&#x4F60;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;<a href="https://cdn.rawgit.com/WebAssembly/wabt/aae5a4b7/demo/wat2wasm/" target="_blank">wat2wasm demo</a>&#x770B;&#x4E0A;&#x9762;&#x7684;&#x4EE3;&#x7801;.</p>
+<h2 id="&#x7EBF;&#x6027;&#x5185;&#x5B58;">&#x7EBF;&#x6027;&#x5185;&#x5B58;</h2>
+<p><code>WebAssembly</code>&#x6709;&#x4E00;&#x4E2A;&#x975E;&#x5E38;&#x7B80;&#x5355;&#x7684;<a href="https://`WebAssembly`.github.io/spec/core/syntax/modules.html#syntax-mem" target="_blank">&#x5185;&#x5B58;&#x6A21;&#x578B;</a>&#x3002; &#x76EE;&#x524D;&#xFF0C;&#x4E00;&#x4E2A;<code>wasm</code>&#x6A21;&#x5757;&#x53EF;&#x4EE5;&#x8BBF;&#x95EE;&#x5355;&#x4E2A;&quot;&#x7EBF;&#x6027;&#x5185;&#x5B58;&quot;&#xFF0C;&#x5B83;&#x672C;&#x8D28;&#x4E0A;&#x662F;&#x4E00;&#x4E2A;&#x56FA;&#x5B9A;&#x6570;&#x5B57;&#x7C7B;&#x578B;&#x7684;&#x666E;&#x901A;&#x6570;&#x7EC4;&#x3002; &#x8FD9;&#x4E2A;<a href="https://`WebAssembly`.github.io/spec/core/syntax/instructions.html#syntax-instr-memory" target="_blank">&#x5185;&#x5B58;&#x6210;&#x957F;&#x6027;</a>&#x662F;&#x9875;&#x9762;&#x5927;&#x5C0F; (64K) &#x7684;&#x500D;&#x6570;&#xFF0C;&#x5E76;&#x4E14;&#x4E0D;&#x80FD;&#x7F29;&#x5C0F;&#x3002;</p>
+<h2 id="webassembly-&#x662F;&#x5426;&#x4EC5;&#x7ED9;&#x5230;-web">WebAssembly &#x662F;&#x5426;&#x4EC5;&#x7ED9;&#x5230; Web?</h2>
+<p>&#x867D;&#x7136;&#x5B83;&#x76EE;&#x524D;&#x5728; JavaScript &#x548C; Web &#x793E;&#x533A; &#x4E2D;&#x53D7;&#x5230;&#x5173;&#x6CE8;&#xFF0C; &#x4F46;&#x5E76;&#x6CA1;&#x6709;&#x9650;&#x5236;&#x5B83;&#x7684;&#x8FD0;&#x884C;&#x73AF;&#x5883;&#x3002; &#x56E0;&#x6B64;&#xFF0C;&#x8BA4;&#x4E3A;&#x5728;&#x4E0D;&#x4E45;&#x7684;&#x5C06;&#x6765;&#xFF0C; <em>wasm</em>&#x5C06;&#x53EF;&#x80FD;&#x6210;&#x4E3A;&#x5728;&#x5404;&#x79CD;&#x73AF;&#x5883;&#x4E2D;&#xFF0C; &#x91CD;&#x8981;&#x7684;&quot;&#x4FBF;&#x643A;&#x5F0F;&#x53EF;&#x6267;&#x884C;&quot;&#x683C;&#x5F0F; (&#x6211;&#x4EEC;&#x5C06;&#x82B1;&#x4E00;&#x4E9B;&#x65F6;&#x95F4;&#x4ED4;&#x7EC6;&#x7814;&#x7A76;&#x4E00;&#x4E0B;<em>wasm</em>&#x4FBF;&#x643A;&#x6027;&#x529F;&#x80FD;&#xFF0C;&#x5F85;&#x672C;&#x4E66;&#x8FDB;&#x4E00;&#x6B65;&#x8BF4;&#x660E;)&#x3002;</p>
+<p><em>&#x4ECA;&#x65F6;&#x4ECA;&#x65E5;</em>&#xFF0C;&#x603B;&#x5F97;&#x6765;&#x8BF4;&#xFF0C;<em>wasm</em>&#x4E3B;&#x8981;&#x4E0E; JavaScript &#x6709;&#x5173;&#xFF0C;&#x5B83;&#x6709;&#x5F88;&#x591A;&#x79CD;&#x7C7B; (&#x5305;&#x62EC;&#x6D4F;&#x89C8;&#x5668;&#x548C; <code>Node.js</code>) &#x3002; &#x7531;&#x4E8E; JS &#x5E7F;&#x6CDB;&#x4E14;&#x6613;&#x4E8E;&#x8BBF;&#x95EE;&#xFF0C; &#x6211;&#x4EEC;&#x5C06;&#x4E3B;&#x8981;&#x5173;&#x6CE8;&#x4F7F;&#x7528;&#x8FD9;&#x4E9B;&#x5E73;&#x53F0;&#x6765;&#x8FD0;&#x884C; Rust &#x751F;&#x6210;&#x7684;<em>wasm</em>&#xFF0C;&#x4F46; &#x5176;&#x4ED6;&#x8BED;&#x8A00;&#x7684;&#x7F16;&#x8BD1; &#x53EF;&#x80FD;&#x4F1A;&#x5728;&#x4E0D;&#x4E45;&#x7684;&#x5C06;&#x6765;&#x53D1;&#x5E03;&#x3002;</p>
+
+                                
+                                </section>
+                                <ins class="adsbygoogle"
+                                     style="display:block"
+                                     data-ad-client="ca-pub-9312750344484857"
+                                     data-ad-slot="2669241897"
+                                     data-ad-format="auto"
+                                     data-full-width-responsive="true"></ins>
+                                <script>
+                                     (adsbygoogle = window.adsbygoogle || []).push({});
+                                </script>                                
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="background-and-concepts.html" class="navigation navigation-prev " aria-label="上一页: 背景和概念">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="game-of-life/" class="navigation navigation-next " aria-label="下一页: 教程">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="./">
+            <a href="./">
+            
+                    
+                    介绍
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="why-rust-and-webassembly.html">
+            <a href="why-rust-and-webassembly.html">
+            
+                    
+                    为啥 Rust 要与 WebAssembly 合作?
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="background-and-concepts.html">
+            <a href="background-and-concepts.html">
+            
+                    
+                    背景和概念
+            </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter active" data-level="1.3.1" data-path="what-is-webassembly.html">
+            <a href="what-is-webassembly.html">
+            
+                    
+                    什么是 WebAssembly?
+            </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="game-of-life/">
+            <a href="game-of-life/">
+            
+                    
+                    教程
+            </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.1.1" data-path="game-of-life/setup.html">
+            <a href="game-of-life/setup.html">
+            
+                    
+                    安装
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.2" data-path="game-of-life/hello-world.html">
+            <a href="game-of-life/hello-world.html">
+            
+                    
+                    Hello, World!
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.3" data-path="game-of-life/rules.html">
+            <a href="game-of-life/rules.html">
+            
+                    
+                    规则们
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.4" data-path="game-of-life/implementing.html">
+            <a href="game-of-life/implementing.html">
+            
+                    
+                    实现康威的生命游戏
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.5" data-path="game-of-life/testing.html">
+            <a href="game-of-life/testing.html">
+            
+                    
+                    测试 生命
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.6" data-path="game-of-life/debugging.html">
+            <a href="game-of-life/debugging.html">
+            
+                    
+                    调试
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.7" data-path="game-of-life/interactivity.html">
+            <a href="game-of-life/interactivity.html">
+            
+                    
+                    添加 交互性
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.8" data-path="game-of-life/time-profiling.html">
+            <a href="game-of-life/time-profiling.html">
+            
+                    
+                    时间 分析
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.9" data-path="game-of-life/code-size.html">
+            <a href="game-of-life/code-size.html">
+            
+                    
+                    收缩 .wasm 尺寸
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.10" data-path="game-of-life/publishing-to-npm.html">
+            <a href="game-of-life/publishing-to-npm.html">
+            
+                    
+                    发布到 npm
+            </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="reference/">
+            <a href="reference/">
+            
+                    
+                    参考
+            </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="reference/crates.html">
+            <a href="reference/crates.html">
+            
+                    
+                    你应该知道的 Crates(箱) 
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="reference/tools.html">
+            <a href="reference/tools.html">
+            
+                    
+                    你应该知道的 工具 
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.3" data-path="reference/project-templates.html">
+            <a href="reference/project-templates.html">
+            
+                    
+                    项目模版 Templates
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.4" data-path="reference/debugging.html">
+            <a href="reference/debugging.html">
+            
+                    
+                    调试
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.5" data-path="reference/time-profiling.html">
+            <a href="reference/time-profiling.html">
+            
+                    
+                    时间 分析
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.6" data-path="reference/code-size.html">
+            <a href="reference/code-size.html">
+            
+                    
+                    收缩 .wasm 尺寸
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.7" data-path="reference/js-ffi.html">
+            <a href="reference/js-ffi.html">
+            
+                    
+                    javascript 互操作
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.8" data-path="reference/which-crates-work-with-wasm.html">
+            <a href="reference/which-crates-work-with-wasm.html">
+            
+                    
+                    哪些 现成的(crates)箱能与 WebAssembly 合作？
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.9" data-path="reference/add-wasm-support-to-crate.html">
+            <a href="reference/add-wasm-support-to-crate.html">
+            
+                    
+                    如何向通用 箱 添加 WebAssembly 支持
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.10" data-path="reference/deploying-to-production.html">
+            <a href="reference/deploying-to-production.html">
+            
+                    
+                    将 Rust 和 Webassembly 部署到生产中
+            </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://book.comptechs.cn" target="_blank" class="gitbook-link"><strong>开源图书(OpenBooks)</strong></a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"什么是 WebAssembly?","level":"1.3.1","depth":2,"next":{"title":"教程","level":"2.1","depth":1,"path":"game-of-life/README.md","ref":"./game-of-life/README.md","articles":[{"title":"安装","level":"2.1.1","depth":2,"path":"game-of-life/setup.md","ref":"./game-of-life/setup.md","articles":[]},{"title":"Hello, World!","level":"2.1.2","depth":2,"path":"game-of-life/hello-world.md","ref":"./game-of-life/hello-world.md","articles":[]},{"title":"规则们","level":"2.1.3","depth":2,"path":"game-of-life/rules.md","ref":"./game-of-life/rules.md","articles":[]},{"title":"实现康威的生命游戏","level":"2.1.4","depth":2,"path":"game-of-life/implementing.md","ref":"./game-of-life/implementing.md","articles":[]},{"title":"测试 生命","level":"2.1.5","depth":2,"path":"game-of-life/testing.md","ref":"./game-of-life/testing.md","articles":[]},{"title":"调试","level":"2.1.6","depth":2,"path":"game-of-life/debugging.md","ref":"./game-of-life/debugging.md","articles":[]},{"title":"添加 交互性","level":"2.1.7","depth":2,"path":"game-of-life/interactivity.md","ref":"./game-of-life/interactivity.md","articles":[]},{"title":"时间 分析","level":"2.1.8","depth":2,"path":"game-of-life/time-profiling.md","ref":"./game-of-life/time-profiling.md","articles":[]},{"title":"收缩 .wasm 尺寸","level":"2.1.9","depth":2,"path":"game-of-life/code-size.md","ref":"./game-of-life/code-size.md","articles":[]},{"title":"发布到 npm","level":"2.1.10","depth":2,"path":"game-of-life/publishing-to-npm.md","ref":"./game-of-life/publishing-to-npm.md","articles":[]}]},"previous":{"title":"背景和概念","level":"1.3","depth":1,"path":"background-and-concepts.md","ref":"./background-and-concepts.md","articles":[{"title":"什么是 WebAssembly?","level":"1.3.1","depth":2,"path":"what-is-webassembly.md","ref":"./what-is-webassembly.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["theme-vmlite@git+https://github.com/vmlite/gitbook-plugin-theme-vmlite.git"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-vmlite":{"showLevel":false,"styles":{"ebook":"styles/ebook.css","epub":"styles/epub.css","mobi":"styles/mobi.css","pdf":"styles/pdf.css","print":"styles/print.css","website":"styles/website.css"}},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Rust开发WebAssembly技术","language":"zh-hans","gitbook":"*"},"file":{"path":"what-is-webassembly.md","mtime":"2020-10-19T01:03:43.654Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-10-19T01:04:13.871Z"},"basePath":".","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/gitbook.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/theme.js"></script>
+    
+        <script src="gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        <script src="gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        <script src="gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        <script src="gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        <script src="gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        <script src="gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-152683495-1"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'UA-152683495-1'); 
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?b6193f769a96b5f12f441649fc8d4e49";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+        </script>
+    </body>
+</html>
+

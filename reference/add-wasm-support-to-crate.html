@@ -1,0 +1,654 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <title>如何向通用 箱 添加 WebAssembly 支持 - Rust开发WebAssembly技术 - 开源图书(OpenBooks)</title>
+        
+        <meta name="description" content="">
+        
+        
+        <script data-ad-client="ca-pub-9312750344484857" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        
+    
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/style.css">
+
+    
+            
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/images/favicon.ico" type="image/x-icon">
+
+    <link rel="next" href="deploying-to-production.html" />
+    <link rel="prev" href="which-crates-work-with-wasm.html" />
+
+    </head>
+    <body>
+        
+<div class="book">  
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+	<a href="/" class="btn pull-left" aria-label="开源图书(OpenBooks)"><i class="fa fa-home"></i></a>
+    
+
+    <!-- Title -->
+    <h1><i class="fa fa-circle-o-notch fa-spin"></i><a href=".." >如何向通用 箱 添加 WebAssembly 支持</a></h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <ins class="adsbygoogle"
+                                     style="display:block"
+                                     data-ad-client="ca-pub-9312750344484857"
+                                     data-ad-slot="2669241897"
+                                     data-ad-format="auto"
+                                     data-full-width-responsive="true"></ins>
+                                <script>
+                                     (adsbygoogle = window.adsbygoogle || []).push({});
+                                </script>
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="&#x600E;&#x4E48;&#x4E3A;-&#x4E00;&#x4E2A;-&#x901A;&#x7528;&#x7BB1;-&#x6DFB;&#x52A0;-webassembly-&#x652F;&#x6301;">&#x600E;&#x4E48;&#x4E3A; &#x4E00;&#x4E2A; &#x901A;&#x7528;&#x7BB1; &#x6DFB;&#x52A0; WebAssembly &#x652F;&#x6301;</h1>
+<p>&#x672C;&#x8282;&#x9002;&#x7528;&#x4E8E;&#xFF0C;&#x5E0C;&#x671B;&#x652F;&#x6301; WebAssembly &#x7684;&#x901A;&#x7528;&#x7BB1;&#x4F5C;&#x8005;&#x3002;</p>
+<h2 id="&#x4E5F;&#x8BB8;&#xFF0C;&#x4F60;&#x7684;-&#x7BB1;&#x5B50;-&#x4EE5;&#x53CA;-&#x652F;&#x6301;-webassembly">&#x4E5F;&#x8BB8;&#xFF0C;&#x4F60;&#x7684; &#x7BB1;&#x5B50; &#x4EE5;&#x53CA; &#x652F;&#x6301; WebAssembly!</h2>
+<p>&#x67E5;&#x770B;&#x6709;&#x5173;<a href="which-crates-work-with-wasm.zh.html">&#x4EC0;&#x4E48;&#x6837;&#x7684;&#x4E8B;&#x60C5;&#x80FD;&#x8BA9;&#x4E00;&#x4E2A;&#x901A;&#x7528;&#x7BB1; <em>&#x4E0D;&#x80FD;</em> &#x79FB;&#x690D;&#x5230; WebAssembly</a>&#x7684;&#x4FE1;&#x606F;&#x3002;&#x5982;&#x679C;&#x60A8;&#x7684;&#x7BB1;&#x5B50;&#x6CA1;&#x6709;&#x4EFB;&#x4F55;&#x8FD9;&#x4E9B;&#x4E1C;&#x897F;&#xFF0C;&#x5B83;&#x53EF;&#x80FD;&#x5DF2;&#x7ECF;&#x652F;&#x6301; WebAssembly!</p>
+<p>&#x60A8;&#x53EF;&#x4EE5;&#x968F;&#x65F6;&#x901A;&#x8FC7;&#x8FD0;&#x884C;<code>cargo build</code>&#xFF0C;&#x68C0;&#x67E5; WebAssembly &#x76EE;&#x6807;:</p>
+<pre><code>cargo build --target wasm32-unknown-unknown
+</code></pre><p>&#x5982;&#x679C;&#x8BE5;&#x547D;&#x4EE4;&#x5931;&#x8D25;&#xFF0C;&#x90A3;&#x4E48;&#x60A8;&#x7684; crate &#x73B0;&#x5728;&#x4E0D;&#x652F;&#x6301; WebAssembly&#x3002;&#x5982;&#x679C;&#x5B83;&#x6CA1;&#x6709;&#x5931;&#x8D25;&#xFF0C;&#x90A3;&#x4E48;&#x4F60;&#x7684;&#x7BB1;&#x5B50;<em>&#x4E0D;&#x4E00;&#x5B9A;</em>&#x652F;&#x6301; WebAssembly&#x3002;&#x4F46;&#x4F60;&#x53EF;&#x4EE5; 100% &#x786E;&#x5B9A;&#x5B83;(&#x7EE7;&#x7EED;&#x8DDF;&#x7740;&#x505A;!)<a href="#maintaining-ongoing-support-for-webassembly">&#x4E3A; wasm &#x6DFB;&#x52A0;&#x6D4B;&#x8BD5; &#xFF0C;&#x8FD8;&#x6709;&#x5728; CI &#x4E0A;&#x8FD0;&#x884C;&#x8FD9;&#x4E9B;&#x6D4B;&#x8BD5;&#x3002;</a></p>
+<h2 id="&#x6DFB;&#x52A0;-webassembly-&#x652F;&#x6301;">&#x6DFB;&#x52A0; WebAssembly &#x652F;&#x6301;</h2>
+<h3 id="&#x907F;&#x514D;-&#x76F4;&#x63A5;&#x6267;&#x884C;-io">&#x907F;&#x514D; &#x76F4;&#x63A5;&#x6267;&#x884C; I/O</h3>
+<p>&#x5728; Web &#x4E0A;&#xFF0C;I/O &#x59CB;&#x7EC8;&#x662F;&#x5F02;&#x6B65;&#x7684;&#xFF0C;&#x4E14;&#x65F6;&#x6CA1;&#x6709;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x3002;&#x4ECE;&#x5E93;&#x4E2D;&#x5206;&#x51FA; I/O &#x56E0;&#x7D20;&#x5427;&#xFF0C;&#x8BA9;&#x7528;&#x6237;&#x4EE5;&#x4E3A;&#x81EA;&#x5DF1;&#x5728;&#x6267;&#x884C; I/O&#xFF0C;&#x4F46;&#x5176;&#x5B9E;&#x5C06;&#x8F93;&#x5165; slice &#x4F20;&#x9012;&#x5230;&#x5E93;&#x4E2D;&#x3002;</p>
+<p>&#x4F8B;&#x5982;,&#x91CD;&#x6784;&#x8FD9;&#x4E2A;:</p>
+<pre><code class="lang-rust"><span class="hljs-keyword">use</span> std::fs;
+<span class="hljs-keyword">use</span> std::path::Path;
+
+<span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">parse_thing</span></span>(path: &amp;Path) -&gt; <span class="hljs-built_in">Result</span>&lt;MyThing, MyError&gt; {
+    <span class="hljs-keyword">let</span> contents = fs::read(path)?;
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>&#x8FDB;&#x5165;&#x8FD9;&#x4E2A;:</p>
+<pre><code class="lang-rust"><span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">parse_thing</span></span>(contents: &amp;[<span class="hljs-keyword">u8</span>]) -&gt; <span class="hljs-built_in">Result</span>&lt;MyThing, MyError&gt; {
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<h3 id="&#x6DFB;&#x52A0;-wasm-bindgen-&#x4F5C;&#x4E3A;&#x4F9D;&#x8D56;">&#x6DFB;&#x52A0; <code>wasm-bindgen</code> &#x4F5C;&#x4E3A;&#x4F9D;&#x8D56;</h3>
+<p>&#x5982;&#x679C;&#x60A8;&#x9700;&#x8981;&#x4E0E;&#x5916;&#x754C;&#x8FDB;&#x884C;&#x4E92;&#x52A8;(&#x5373;&#xFF0C;&#x60A8;&#x4E0D;&#x80FD;&#x8BA9; &#x5E93; &#x7684;&#x4F7F;&#x7528;&#x8005;&#x4E3A;&#x60A8;&#x63A8;&#x52A8;&#x8FD9;&#x79CD;&#x4E92;&#x52A8;)&#xFF0C;&#x90A3;&#x4E48;&#x60A8;&#x9700;&#x8981;&#x6DFB;&#x52A0;<code>wasm-bindgen</code>(&#x8FD8;&#x6709;<code>js-sys</code>&#x548C;<code>web-sys</code>&#xFF0C;&#x82E5;&#x4F60;&#x9700;&#x8981;&#x5B83;&#x4EEC;)&#x4F5C;&#x4E3A;&#x7F16;&#x8BD1; WebAssembly &#x76EE;&#x6807;&#x7684;&#x4F9D;&#x8D56;&#x9879;:</p>
+<pre><code class="lang-toml"><span class="hljs-section">[target.&apos;cfg(target_arch = &quot;wasm32&quot;)&apos;.dependencies]</span>
+<span class="hljs-attr">wasm-bindgen</span> = <span class="hljs-string">&quot;0.2&quot;</span>
+<span class="hljs-attr">js-sys</span> = <span class="hljs-string">&quot;0.3&quot;</span>
+<span class="hljs-attr">web-sys</span> = <span class="hljs-string">&quot;0.3&quot;</span>
+</code></pre>
+<h3 id="&#x907F;&#x514D;-&#x540C;&#x6B65;-io">&#x907F;&#x514D; &#x540C;&#x6B65; I/O</h3>
+<p>&#x5982;&#x679C;&#x4F60;&#x5FC5;&#x987B;&#x5728;&#x5E93;&#x4E2D;&#x6267;&#x884C; I/O&#xFF0C;&#x90A3;&#x5B83;&#x4E0D;&#x80FD;&#x540C;&#x6B65;&#x3002;Web &#x4E0A;&#x53EA;&#x6709;&#x5F02;&#x6B65; I/O&#x3002;&#x4F7F;&#x7528;<a href="https://crates.io/crates/futures" target="_blank"><code>futures</code>&#x7BB1;</a>&#x548C;<a href="https://rustwasm.github.io/wasm-bindgen/api/wasm_bindgen_futures/" target="_blank"><code>wasm-bindgen-futures</code>&#x7BB1;</a>&#x7BA1;&#x7406;&#x5F02;&#x6B65; I/O&#x3002;&#x5982;&#x679C;&#x60A8;&#x7684;&#x5E93;&#x51FD;&#x6570;&#x4E3A;&#x67D0;&#x4E9B; future &#x7C7B;&#x578B;<code>F</code>&#x7684;&#x901A;&#x7528;&#x51FD;&#x6570;&#xFF0C;&#x90A3;&#x4E48; future &#x662F;&#x53EF;&#x4EE5;&#x5B9E;&#x73B0;&#x7684;&#xFF0C;&#x53EF;&#x80FD;&#x662F;&#x901A;&#x8FC7;&#x5728; Web &#x4E0A;<code>fetch</code>&#xFF0C;&#x6216;&#x662F;&#x901A;&#x8FC7;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x63D0;&#x4F9B;&#x7684;&#x975E;&#x963B;&#x585E; I/O&#x3002;</p>
+<pre><code class="lang-rust"><span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">do_stuff</span></span>&lt;F&gt;(future: F) -&gt; <span class="hljs-keyword">impl</span> Future&lt;Item = MyOtherThing&gt;
+<span class="hljs-keyword">where</span>
+    F: Future&lt;Item = MyThing&gt;,
+{
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>&#x60A8;&#x8FD8;&#x53EF;&#x4EE5;&#x4E3A; WebAssembly &#x548C; Web &#x4EE5;&#x53CA;&#x672C;&#x673A;&#x76EE;&#x6807;&#xFF0C;&#x5B9A;&#x4E49;&#x4E00;&#x4E2A; trait &#x5E76;&#x5B9E;&#x73B0;&#x5B83;:</p>
+<pre><code class="lang-rust"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">ReadMyThing</span></span> {
+    <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">F</span></span>: Future&lt;Item = MyThing&gt;;
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">read</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; Self::F;
+}
+
+<span class="hljs-meta">#[cfg(target_arch = <span class="hljs-meta-string">&quot;wasm32&quot;</span>)]</span>
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">WebReadMyThing</span></span> {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-meta">#[cfg(target_arch = <span class="hljs-meta-string">&quot;wasm32&quot;</span>)]</span>
+<span class="hljs-keyword">impl</span> ReadMyThing <span class="hljs-keyword">for</span> WebReadMyThing {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-meta">#[cfg(not(target_arch = <span class="hljs-meta-string">&quot;wasm32&quot;</span>))]</span>
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">NativeReadMyThing</span></span> {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-meta">#[cfg(not(target_arch = <span class="hljs-meta-string">&quot;wasm32&quot;</span>))]</span>
+<span class="hljs-keyword">impl</span> ReadMyThing <span class="hljs-keyword">for</span> NativeReadMyThing {
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<h3 id="&#x907F;&#x514D;-&#x6D3E;&#x751F;&#x7EBF;&#x7A0B;">&#x907F;&#x514D; &#x6D3E;&#x751F;&#x7EBF;&#x7A0B;</h3>
+<p>Wasm &#x8FD8;&#x4E0D;&#x652F;&#x6301;&#x7EBF;&#x7A0B;(&#x4F46;&#x662F;<a href="https://rustwasm.github.io/2018/10/24/multithreading-rust-and-wasm.html" target="_blank">&#x5B9E;&#x9A8C;&#x578B;&#x5DE5;&#x4F5C;&#x8FD8;&#x662F;&#x5728;&#x7EE7;&#x7EED;</a>)&#xFF0C;&#x6240;&#x4EE5;&#x8BD5;&#x56FE;&#x5728; wasm &#x4E2D;&#x4EA7;&#x751F;&#x7EBF;&#x7A0B;&#x4F1A;&#x5F15;&#x8D77;&#x6050;&#x614C;&#x3002;</p>
+<p>&#x60A8;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;<code>#[cfg(..)]</code>&#x542F;&#x7528;&#x4EE3;&#x7801;&#x8DEF;&#x5F84;&#xFF0C;&#x662F;&#x4E0D;&#x662F;&#x7EBF;&#x7A0B;&#x548C;&#x975E;&#x7EBF;&#x7A0B;&#xFF0C;&#x5177;&#x4F53;&#x53D6;&#x51B3;&#x4E8E;&#x76EE;&#x6807;&#x662F;&#x5426;&#x4E3A; WebAssembly:</p>
+<pre><code class="lang-rust"><span class="hljs-meta">#![cfg(target_arch = <span class="hljs-meta-string">&quot;wasm32&quot;</span>)]</span>
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">do_work</span></span>() {
+    <span class="hljs-comment">// &#x53EA;&#x4F7F;&#x7528;&#x8FD9;&#x4E2A;&#x7EBF;&#x7A0B;&#x2026;</span>
+}
+
+<span class="hljs-meta">#![cfg(not(target_arch = <span class="hljs-meta-string">&quot;wasm32&quot;</span>))]</span>
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">do_work</span></span>() {
+    <span class="hljs-keyword">use</span> std::thread;
+
+    <span class="hljs-comment">// &#x5C06;&#x5DE5;&#x4F5C;&#x6269;&#x5C55;&#x5230;&#x52A9;&#x624B;&#x7EBF;&#x7A0B;&#x2026;.</span>
+    thread::spawn(|| {
+        <span class="hljs-comment">// ...</span>
+    });
+}
+</code></pre>
+<p>&#x53E6;&#x4E00;&#x79CD;&#x9009;&#x62E9;&#x662F;&#x5C06;&#x4ECE;&#x5E93;&#x4E2D;&#x751F;&#x6210;&#x7684;&#x7EBF;&#x7A0B;&#x5206;&#x79BB;&#x51FA;&#x6765;&#xFF0C;&#x5E76;&#x5141;&#x8BB8;&#x7528;&#x6237;&#x5E26;&#x4E0A;&#x201C;&#x81EA;&#x5DF1;&#x7684;&#x7EBF;&#x7A0B;&#x201D;&#xFF0C;&#x7C7B;&#x4F3C;&#x4E8E;&#x5C06;&#x6587;&#x4EF6; I/O &#x5206;&#x79BB;&#x51FA;&#x6765;&#xFF0C;&#x5E76;&#x5141;&#x8BB8;&#x7528;&#x6237;&#x5E26;&#x4E0A;&#x81EA;&#x5DF1;&#x7684; I/O&#x3002;&#x8FD9;&#x6709;&#x4E00;&#x4E2A;&#x526F;&#x4F5C;&#x7528;&#xFF0C;&#x5C31;&#x662F;&#x5BF9;&#x60F3;&#x8981;&#x62E5;&#x6709;&#x81EA;&#x5DF1;&#x81EA;&#x5B9A;&#x4E49;&#x7EBF;&#x7A0B;&#x6C60;&#x7684;&#x5E94;&#x7528;&#x7A0B;&#x5E8F;&#x8981;&#x8FDB;&#x884C;&#x53CB;&#x597D;&#x5904;&#x7406;&#x3002;</p>
+<h2 id="maintaining-ongoing-support-for-webassembly">Maintaining Ongoing Support for WebAssembly</h2>
+<blockquote>
+<p>&#x7EF4;&#x62A4;&#x5BF9; WebAssembly &#x7684;&#x6301;&#x7EED;&#x652F;&#x6301;</p>
+</blockquote>
+<h3 id="&#x5728;-ci-&#x4E0A;&#xFF0C;&#x6784;&#x5EFA;&#x6210;-wasm32-unknown-unknown">&#x5728; CI &#x4E0A;&#xFF0C;&#x6784;&#x5EFA;&#x6210; <code>wasm32-unknown-unknown</code></h3>
+<p>&#x901A;&#x8FC7;&#x8BA9; CI &#x811A;&#x672C;&#x8FD0;&#x884C;&#x4EE5;&#x4E0B;&#x547D;&#x4EE4;&#xFF0C;&#x786E;&#x4FDD;&#x4E3A; WebAssembly &#x76EE;&#x6807;&#x65F6;&#x7F16;&#x8BD1;&#x4E0D;&#x4F1A;&#x5931;&#x8D25;:</p>
+<pre><code>rustup target add wasm32-unknown-unknown
+cargo check --target wasm32-unknown-unknown
+</code></pre><p>&#x4F8B;&#x5982;,&#x60A8;&#x53EF;&#x4EE5;&#x5C06;&#x6B64; Travis CI &#x7684;&#x914D;&#x7F6E;&#x6DFB;&#x52A0;&#x5230;&#x60A8;&#x7684;<code>.travis.yml</code>:</p>
+<pre><code class="lang-yaml"><span class="hljs-attr">matrix:</span>
+<span class="hljs-attr">  include:</span>
+<span class="hljs-attr">    - language:</span> rust
+<span class="hljs-attr">      rust:</span> stable
+<span class="hljs-attr">      name:</span> <span class="hljs-string">&apos;check wasm32 support&apos;</span>
+<span class="hljs-attr">      install:</span> rustup target add wasm32-unknown-unknown
+<span class="hljs-attr">      script:</span> cargo check --target wasm32-unknown-unknown
+</code></pre>
+<h3 id="&#x5728;-nodejs-&#x548C;-headless-&#x6D4F;&#x89C8;&#x5668;-&#x4E0A;&#x6D4B;&#x8BD5;">&#x5728; Node.js &#x548C; Headless &#x6D4F;&#x89C8;&#x5668; &#x4E0A;&#x6D4B;&#x8BD5;</h3>
+<p>&#x60A8;&#x53EF;&#x4EE5;&#x5728; Node.js &#x6216;&#x65E0;&#x5934;&#x6D4F;&#x89C8;&#x5668;&#x4E2D;&#xFF0C;&#x4F7F;&#x7528;<code>wasm-bindgen-test</code>&#x548C;<code>wasm-pack test</code>&#x5B50;&#x547D;&#x4EE4;&#xFF0C;&#x8FD0;&#x884C; wasm &#x6D4B;&#x8BD5;&#x3002;&#x60A8;&#x751A;&#x81F3;&#x53EF;&#x4EE5;&#x5C06;&#x8FD9;&#x4E9B;&#x6D4B;&#x8BD5;&#x96C6;&#x6210;&#x5230; CI &#x4E2D;&#x3002;</p>
+<p><a href="https://rustwasm.github.io/wasm-bindgen/wasm-bindgen-test/index.html" target="_blank">&#x5B66;&#x4E60; &#xFF0C;&#x66F4;&#x591A; &#x6D4B;&#x8BD5; wasm &#x7684;&#x8D44;&#x6E90;</a></p>
+
+                                
+                                </section>
+                                <ins class="adsbygoogle"
+                                     style="display:block"
+                                     data-ad-client="ca-pub-9312750344484857"
+                                     data-ad-slot="2669241897"
+                                     data-ad-format="auto"
+                                     data-full-width-responsive="true"></ins>
+                                <script>
+                                     (adsbygoogle = window.adsbygoogle || []).push({});
+                                </script>                                
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="which-crates-work-with-wasm.html" class="navigation navigation-prev " aria-label="上一页: 哪些 现成的(crates)箱能与 WebAssembly 合作？">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="deploying-to-production.html" class="navigation navigation-next " aria-label="下一页: 将 Rust 和 Webassembly 部署到生产中">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            <a href="../">
+            
+                    
+                    介绍
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../why-rust-and-webassembly.html">
+            <a href="../why-rust-and-webassembly.html">
+            
+                    
+                    为啥 Rust 要与 WebAssembly 合作?
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="../background-and-concepts.html">
+            <a href="../background-and-concepts.html">
+            
+                    
+                    背景和概念
+            </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.3.1" data-path="../what-is-webassembly.html">
+            <a href="../what-is-webassembly.html">
+            
+                    
+                    什么是 WebAssembly?
+            </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../game-of-life/">
+            <a href="../game-of-life/">
+            
+                    
+                    教程
+            </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.1.1" data-path="../game-of-life/setup.html">
+            <a href="../game-of-life/setup.html">
+            
+                    
+                    安装
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.2" data-path="../game-of-life/hello-world.html">
+            <a href="../game-of-life/hello-world.html">
+            
+                    
+                    Hello, World!
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.3" data-path="../game-of-life/rules.html">
+            <a href="../game-of-life/rules.html">
+            
+                    
+                    规则们
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.4" data-path="../game-of-life/implementing.html">
+            <a href="../game-of-life/implementing.html">
+            
+                    
+                    实现康威的生命游戏
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.5" data-path="../game-of-life/testing.html">
+            <a href="../game-of-life/testing.html">
+            
+                    
+                    测试 生命
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.6" data-path="../game-of-life/debugging.html">
+            <a href="../game-of-life/debugging.html">
+            
+                    
+                    调试
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.7" data-path="../game-of-life/interactivity.html">
+            <a href="../game-of-life/interactivity.html">
+            
+                    
+                    添加 交互性
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.8" data-path="../game-of-life/time-profiling.html">
+            <a href="../game-of-life/time-profiling.html">
+            
+                    
+                    时间 分析
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.9" data-path="../game-of-life/code-size.html">
+            <a href="../game-of-life/code-size.html">
+            
+                    
+                    收缩 .wasm 尺寸
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.10" data-path="../game-of-life/publishing-to-npm.html">
+            <a href="../game-of-life/publishing-to-npm.html">
+            
+                    
+                    发布到 npm
+            </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="divider"></li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="./">
+            <a href="./">
+            
+                    
+                    参考
+            </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="crates.html">
+            <a href="crates.html">
+            
+                    
+                    你应该知道的 Crates(箱) 
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="tools.html">
+            <a href="tools.html">
+            
+                    
+                    你应该知道的 工具 
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.3" data-path="project-templates.html">
+            <a href="project-templates.html">
+            
+                    
+                    项目模版 Templates
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.4" data-path="debugging.html">
+            <a href="debugging.html">
+            
+                    
+                    调试
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.5" data-path="time-profiling.html">
+            <a href="time-profiling.html">
+            
+                    
+                    时间 分析
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.6" data-path="code-size.html">
+            <a href="code-size.html">
+            
+                    
+                    收缩 .wasm 尺寸
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.7" data-path="js-ffi.html">
+            <a href="js-ffi.html">
+            
+                    
+                    javascript 互操作
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.8" data-path="which-crates-work-with-wasm.html">
+            <a href="which-crates-work-with-wasm.html">
+            
+                    
+                    哪些 现成的(crates)箱能与 WebAssembly 合作？
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="3.1.9" data-path="add-wasm-support-to-crate.html">
+            <a href="add-wasm-support-to-crate.html">
+            
+                    
+                    如何向通用 箱 添加 WebAssembly 支持
+            </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.10" data-path="deploying-to-production.html">
+            <a href="deploying-to-production.html">
+            
+                    
+                    将 Rust 和 Webassembly 部署到生产中
+            </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://book.comptechs.cn" target="_blank" class="gitbook-link"><strong>开源图书(OpenBooks)</strong></a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"如何向通用 箱 添加 WebAssembly 支持","level":"3.1.9","depth":2,"next":{"title":"将 Rust 和 Webassembly 部署到生产中","level":"3.1.10","depth":2,"path":"reference/deploying-to-production.md","ref":"./reference/deploying-to-production.md","articles":[]},"previous":{"title":"哪些 现成的(crates)箱能与 WebAssembly 合作？","level":"3.1.8","depth":2,"path":"reference/which-crates-work-with-wasm.md","ref":"./reference/which-crates-work-with-wasm.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-vmlite@git+https://github.com/vmlite/gitbook-plugin-theme-vmlite.git"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-vmlite":{"showLevel":false,"styles":{"ebook":"styles/ebook.css","epub":"styles/epub.css","mobi":"styles/mobi.css","pdf":"styles/pdf.css","print":"styles/print.css","website":"styles/website.css"}},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Rust开发WebAssembly技术","language":"zh-hans","gitbook":"*"},"file":{"path":"reference/add-wasm-support-to-crate.md","mtime":"2020-10-19T01:03:43.654Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-10-19T01:04:13.871Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/gitbook.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/gitbook-plugin-theme-default@1.0.7/_assets/website/theme.js"></script>
+    
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-152683495-1"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'UA-152683495-1'); 
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?b6193f769a96b5f12f441649fc8d4e49";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+        </script>
+    </body>
+</html>
+
