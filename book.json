@@ -2,6 +2,6 @@
   "title": "Rust开发WebAssembly技术",
   "language": "zh-hans",
 	"plugins" :[
-		"theme-openbook@git+https://github.com/liuxfe/gitbook-plugin-theme-openbook.git"
+		"theme-oebook@git+https://github.com/oebook/theme-gitbook.git"
 	]
 }
